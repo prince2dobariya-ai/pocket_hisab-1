@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pocket_hisab/screens/expense/add_expense_screen.dart';
+import 'package:pocket_hisab/screens/add_wallet_money_screen.dart';
+import 'package:pocket_hisab/screens/hisab/hisab_screen.dart';
 
 class QuickActions extends StatelessWidget {
   const QuickActions({super.key});
@@ -10,68 +13,86 @@ class QuickActions extends StatelessWidget {
         Row(
           mainAxisAlignment: .spaceBetween,
           children: [
-            Column(
-              children: [
-                Container(
-                  padding: .all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    shape: .circle,
+            _buildActionItem(
+              context,
+              icon: Icons.add,
+              label: 'Add Expense',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddExpenseScreen(),
                   ),
-                  child: Icon(Icons.add, size: 40, color: Colors.white),
-                ),
-                Text('Add Expense'),
-              ],
+                );
+              },
             ),
 
-            Column(
-              children: [
-                Container(
-                  padding: .all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    shape: .circle,
-                  ),
-                  child: Icon(
-                    Icons.calendar_month,
-                    size: 40,
-                    color: Colors.white,
-                  ),
-                ),
-                Text('Add EMI'),
-              ],
+            _buildActionItem(
+              context,
+              icon: Icons.calendar_month,
+              label: 'Add EMI',
+              onTap: () {
+                // TODO: Implement Add EMI Screen
+              },
             ),
 
-            Column(
-              children: [
-                Container(
-                  padding: .all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    shape: .circle,
+            _buildActionItem(
+              context,
+              icon: Icons.wallet,
+              label: 'Add Wallet',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddWalletMoneyScreen(),
                   ),
-                  child: Icon(Icons.wallet, size: 40, color: Colors.white),
-                ),
-                Text('Add Wallet'),
-              ],
+                );
+              },
             ),
 
-            Column(
-              children: [
-                Container(
-                  padding: .all(12.0),
-                  decoration: BoxDecoration(
-                    color: Colors.amber,
-                    shape: .circle,
-                  ),
-                  child: Icon(Icons.event, size: 40, color: Colors.white),
-                ),
-                Text('Add Event'),
-              ],
+            _buildActionItem(
+              context,
+              icon: Icons.account_balance,
+              label: 'Hisab',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HisabScreen()),
+                );
+              },
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildActionItem(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12.0),
+              decoration: const BoxDecoration(
+                color: Colors.amber,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: 40, color: Colors.white),
+            ),
+            const SizedBox(height: 4),
+            Text(label, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
     );
   }
 }

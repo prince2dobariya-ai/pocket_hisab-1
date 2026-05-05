@@ -1,4 +1,4 @@
-package com.khissu.pocket.hisab.pocket_hisab
+package com.khissu.pocket.hisab
 
 import io.flutter.embedding.android.FlutterActivity
 

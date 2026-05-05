@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:pocket_hisab/screens/wallet_screen.dart';
+import 'package:get/get.dart';
+import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/screens/add_wallet_money_screen.dart';
 
 class WalletCard extends StatelessWidget {
@@ -7,14 +8,10 @@ class WalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => WalletScreen()),
-        );
-      },
+    final walletCtrl = Get.find<WalletController>();
 
+    return InkWell(
+      onTap: () {},
       child: Card(
         color: const Color.fromRGBO(227, 242, 253, 1),
         shape: RoundedRectangleBorder(borderRadius: .circular(16)),
@@ -26,11 +23,19 @@ class WalletCard extends StatelessWidget {
             children: [
               Row(
                 spacing: 5,
-                children: [Icon(Icons.account_balance_wallet), Text("Wallet")],
+                children: const [
+                  Icon(Icons.account_balance_wallet),
+                  Text("Wallet"),
+                ],
               ),
-              Text(
-                "₹10,000",
-                style: TextStyle(fontSize: 24, fontWeight: .bold),
+              Obx(
+                () => Text(
+                  "₹${walletCtrl.totalBalance.toStringAsFixed(0)}",
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
               ElevatedButton(
                 onPressed: () {

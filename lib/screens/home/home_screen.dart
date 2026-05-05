@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:pocket_hisab/screens/home/widgets/quick_actions.dart';
 import 'package:pocket_hisab/screens/home/widgets/salary_card.dart';
 import 'package:pocket_hisab/screens/home/widgets/saving_card.dart';
 import 'package:pocket_hisab/screens/home/widgets/wallet_card.dart';
-import 'package:pocket_hisab/screens/wallet_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                       style: TextStyle(fontSize: 22, fontWeight: .bold),
                     ),
                     Text(
-                      "${DateTime.now().month} ${DateTime.now().year}",
+                      DateFormat.yMMMM().format(DateTime.now()),
                       style: TextStyle(fontSize: 18),
                     ),
                   ],
