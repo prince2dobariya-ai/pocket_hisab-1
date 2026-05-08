@@ -8,6 +8,7 @@ import 'package:pocket_hisab/models/expense_model.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
+import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class AddExpenseScreen extends StatefulWidget {
   const AddExpenseScreen({super.key});
@@ -93,21 +94,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _amountController,
-              keyboardType: TextInputType.number,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                hintText: "0.00",
-                prefixIcon: const Icon(Icons.currency_rupee, size: 28),
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+            CustomTextField(labelText: 'amount', controller: _amountController, keyboardType: .number),
             const SizedBox(height: 24),
             const Text(
               "Category",
@@ -201,19 +188,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            TextField(
-              controller: _dateController,
-              readOnly: true,
-              onTap: () => _selectDate(context),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                prefixIcon: const Icon(Icons.calendar_today_outlined),
-              ),
+            CustomTextField(
+                labelText: '',
+                controller: _dateController,
+                readOnly: true,
+                onTap: ()=>_selectDate(context),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -252,7 +231,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         if (isSelected)
                           BoxShadow(
                             color: AppColors.primary.withOpacity(0.3),
-                            blurRadius: 8,
+                            blurRadius: 5,
                             offset: const Offset(0, 4),
                           )
                         else
@@ -297,19 +276,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            TextField(
+            CustomTextField(labelText: 'Add a note...',
               controller: _noteController,
-              maxLines: 3,
-              decoration: InputDecoration(
-                hintText: "Add a note...",
-                filled: true,
-                fillColor: Colors.grey.shade100,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+              minLine: 3,
+              maxLine: 3,),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,

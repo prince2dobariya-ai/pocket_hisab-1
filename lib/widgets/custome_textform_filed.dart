@@ -11,6 +11,7 @@ class CustomTextField extends StatelessWidget {
   final bool? readOnly;
   final TextEditingController controller;
   final void Function(String)? onChange;
+  final void Function()? onTap;
   final IconButton? suffixIcon;
   final bool? autoFocus;
   final List<TextInputFormatter>? inputFormatters;
@@ -26,6 +27,7 @@ class CustomTextField extends StatelessWidget {
     this.minLine = 1,
     this.maxLength,
     this.onChange,
+    this.onTap,
     required this.controller,
     this.suffixIcon,
     this.autoFocus,
@@ -47,6 +49,7 @@ class CustomTextField extends StatelessWidget {
       },
       inputFormatters: inputFormatters,
       textInputAction: TextInputAction.next,
+      onTap: onTap,
       decoration: InputDecoration(
         suffixIcon: suffixIcon,
         labelText: labelText,

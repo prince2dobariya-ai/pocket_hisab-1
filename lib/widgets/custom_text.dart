@@ -30,7 +30,7 @@ class AppText extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
 
       style: TextStyle(
-        fontSize: size ?? 14,
+        fontSize: size ?? 16,
         fontWeight: fontWeight ?? FontWeight.w500,
         color: color ?? AppColors.textDark,
         fontFamily: 'Poppins',
@@ -54,9 +54,8 @@ class HeadingText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-
       style: TextStyle(
-        fontSize: 22,
+        fontSize: 18,
         fontWeight: FontWeight.bold,
         color: color ?? AppColors.textDark,
         fontFamily: 'Poppins',
