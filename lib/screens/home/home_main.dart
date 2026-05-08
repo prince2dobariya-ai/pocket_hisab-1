@@ -35,7 +35,6 @@ class _HomeMainState extends State<HomeMain>
       appBar: CustomAppBar(title: "Khissu"),
       body: TabBarView(
         controller: _tabController,
-        physics: const NeverScrollableScrollPhysics(),
         children: [HomeScreen(), WalletScreen(), PersonScreen()],
       ),
       bottomNavigationBar: BottomNavigationBar(

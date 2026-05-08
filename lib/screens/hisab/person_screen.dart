@@ -5,7 +5,6 @@ import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/person_model.dart';
-import 'package:pocket_hisab/screens/hisab/hisab_transaction_screen.dart';
 import 'package:pocket_hisab/screens/hisab/person_hisab_history_screen.dart';
 import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
@@ -23,9 +22,7 @@ class PersonScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 12,
-              ).copyWith(top: 16),
+              margin: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: AppColors.primary.withAlpha(30),
                 borderRadius: BorderRadius.circular(16),
@@ -109,9 +106,11 @@ class PersonScreen extends StatelessWidget {
                     //     ? Colors.green
                     //     : Colors.red;
                     return ListTile(
-                      onTap: () => Get.to(() => PersonHisabHistoryScreen(
-                            personName: person.personName,
-                          )),
+                      onTap: () => Get.to(
+                        () => PersonHisabHistoryScreen(
+                          personName: person.personName,
+                        ),
+                      ),
                       title: Text(person.personName),
                       leading: CircleAvatar(
                         child: Text(

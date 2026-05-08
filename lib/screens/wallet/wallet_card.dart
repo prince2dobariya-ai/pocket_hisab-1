@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
@@ -8,6 +9,7 @@ import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
 import 'package:pocket_hisab/controllers/hisab_controller.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
+import 'package:pocket_hisab/widgets/custom_button.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class WalletCard extends StatelessWidget {
@@ -38,7 +40,10 @@ class WalletCard extends StatelessWidget {
         padding: .all(16.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.purple.shade300, Colors.blue.shade300],
+            colors: [
+              AppColors.primary.withValues(alpha: 0.8),
+              AppColors.secondary.withValues(alpha: 0.8),
+            ],
             begin: Alignment.bottomLeft,
             end: Alignment.topRight,
           ),
@@ -70,10 +75,14 @@ class WalletCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                  ),
                   onPressed: () {
                     Get.bottomSheet(
-                      _AddSalaryBottomSheet(),
+                      _AddWalletBottomSheet(),
                       isScrollControlled: true,
                       backgroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
@@ -83,13 +92,8 @@ class WalletCard extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  icon: Icon(Icons.add, color: AppColors.primary, size: 24),
+                  label: Text("Add to Wallet"),
                 ),
               ],
             ),
@@ -138,12 +142,12 @@ class WalletCard extends StatelessWidget {
   }
 }
 
-class _AddSalaryBottomSheet extends StatefulWidget {
+class _AddWalletBottomSheet extends StatefulWidget {
   @override
-  State<_AddSalaryBottomSheet> createState() => _AddSalaryBottomSheetState();
+  State<_AddWalletBottomSheet> createState() => _AddWalletBottomSheetState();
 }
 
-class _AddSalaryBottomSheetState extends State<_AddSalaryBottomSheet> {
+class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
   final _amountController = TextEditingController();
   final _sourceController = TextEditingController(text: "Salary");
   final walletCtrl = Get.find<WalletController>();
@@ -214,14 +218,9 @@ class _AddSalaryBottomSheetState extends State<_AddSalaryBottomSheet> {
                       padding: const .symmetric(horizontal: 16, vertical: 10),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Colors.blue.shade400
+                            ? AppColors.primary
                             : Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? Colors.blue.shade400
-                              : Colors.transparent,
-                        ),
                       ),
                       child: Text(
                         source,
@@ -252,7 +251,7 @@ class _AddSalaryBottomSheetState extends State<_AddSalaryBottomSheet> {
                 );
               }
               return DropdownButtonFormField<String>(
-                value: _selectedPerson,
+                initialValue: _selectedPerson,
                 hint: const Text("Select friend"),
                 decoration: InputDecoration(
                   filled: true,
@@ -281,76 +280,62 @@ class _AddSalaryBottomSheetState extends State<_AddSalaryBottomSheet> {
           ],
 
           const SizedBox(height: 24),
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue.shade400,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: () async {
-                final amountText = _amountController.text.trim();
-                if (amountText.isEmpty) {
-                  Get.snackbar('Error', 'Please enter amount');
-                  return;
-                }
-                final amount = double.tryParse(amountText);
-                if (amount == null || amount <= 0) {
-                  Get.snackbar('Error', 'Invalid amount entered');
-                  return;
-                }
+          CustomButton(
+            title: "Add Money",
+            onTap: () async {
+              final amountText = _amountController.text.trim();
+              if (amountText.isEmpty) {
+                Get.snackbar('Error', 'Please enter amount');
+                return;
+              }
+              final amount = double.tryParse(amountText);
+              if (amount == null || amount <= 0) {
+                Get.snackbar('Error', 'Invalid amount entered');
+                return;
+              }
 
-                if (walletCtrl.wallets.isEmpty) {
-                  Get.snackbar('Error', 'No wallet found');
-                  return;
-                }
+              if (walletCtrl.wallets.isEmpty) {
+                Get.snackbar('Error', 'No wallet found');
+                return;
+              }
 
-                if (_sourceController.text == 'Friend' &&
-                    _selectedPerson == null) {
-                  Get.snackbar('Error', 'Please select a friend');
-                  return;
-                }
+              if (_sourceController.text == 'Friend' &&
+                  _selectedPerson == null) {
+                Get.snackbar('Error', 'Please select a friend');
+                return;
+              }
 
-                final targetWalletId = walletCtrl.wallets.first.id!;
+              final targetWalletId = walletCtrl.wallets.first.id!;
 
-                // 1. Credit to wallet
-                await walletCtrl.credit(
-                  walletId: targetWalletId,
-                  amount: amount,
-                  source: _sourceController.text == 'Friend'
-                      ? 'From Friend: $_selectedPerson'
-                      : _sourceController.text,
-                  note: "Added from ${_sourceController.text}",
+              // 1. Credit to wallet
+              await walletCtrl.credit(
+                walletId: targetWalletId,
+                amount: amount,
+                source: _sourceController.text == 'Friend'
+                    ? 'From Friend: $_selectedPerson'
+                    : _sourceController.text,
+                note: "Added from ${_sourceController.text}",
+              );
+
+              // 2. Record in Hisab if it's from a friend (Borrowing)
+              if (_sourceController.text == 'Friend') {
+                final hisabCtrl = Get.find<HisabController>();
+                await hisabCtrl.addHisab(
+                  HisabModel(
+                    personName: _selectedPerson!,
+                    type: 'borrowed',
+                    amount: amount,
+                    amountPaid: 0.0,
+                    remainingAmount: amount,
+                    status: 'pending',
+                    note: "Borrowed from friend",
+                    createdAt: DateTime.now().toIso8601String(),
+                  ),
                 );
+              }
 
-                // 2. Record in Hisab if it's from a friend (Borrowing)
-                if (_sourceController.text == 'Friend') {
-                  final hisabCtrl = Get.find<HisabController>();
-                  await hisabCtrl.addHisab(
-                    HisabModel(
-                      personName: _selectedPerson!,
-                      type: 'borrowed',
-                      amount: amount,
-                      amountPaid: 0.0,
-                      remainingAmount: amount,
-                      status: 'pending',
-                      note: "Borrowed from friend",
-                      createdAt: DateTime.now().toIso8601String(),
-                    ),
-                  );
-                }
-
-                Get.back();
-              },
-              child: const Text(
-                "Add Money",
-                style: TextStyle(fontSize: 18, fontWeight: .bold),
-              ),
-            ),
+              Get.back();
+            },
           ),
         ],
       ),

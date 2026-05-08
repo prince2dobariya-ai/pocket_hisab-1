@@ -18,7 +18,7 @@ class WalletScreen extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0).copyWith(top: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -27,10 +27,8 @@ class WalletScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const HeadingText(
-                  "Recent Transactions",
-                ),
-                AppText("See All"),
+                const HeadingText("Recent Transactions"),
+                // AppText("See All"),
               ],
             ),
             Expanded(
@@ -60,20 +58,20 @@ class WalletScreen extends StatelessWidget {
                   );
                 }
 
-                final groupedTransactions = groupBy(
-                  walletCtrl.transactions,
-                      (tx) {
-                    final date = DateTime.parse(tx.createdAt);
-                    return DateTime(date.year, date.month, date.day);
-                  },
-                );
+                final groupedTransactions = groupBy(walletCtrl.transactions, (
+                  tx,
+                ) {
+                  final date = DateTime.parse(tx.createdAt);
+                  return DateTime(date.year, date.month, date.day);
+                });
                 final sortedDates = groupedTransactions.keys.toList()
                   ..sort((a, b) => b.compareTo(a));
                 return ListView.separated(
                   shrinkWrap: true,
+                  padding: .only(bottom: 70),
                   itemCount: sortedDates.length,
                   separatorBuilder: (context, index) =>
-                      const Divider(height: 1,color: AppColors.border,),
+                      const Divider(height: 1, color: AppColors.border),
                   itemBuilder: (context, index) {
                     final date = sortedDates[index];
                     final transactions = groupedTransactions[date]!;
@@ -83,59 +81,59 @@ class WalletScreen extends StatelessWidget {
                         /// Date Header
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          child: HeadingText(
-                            getDateTitle(date),
+                          child: Container(
+                            width: .infinity,
+                            padding: .symmetric(horizontal: 12, vertical: 6),
+                            color: AppColors.border,
+                            child: HeadingText(getDateTitle(date)),
                           ),
                         ),
 
                         /// Transactions
-                      ...transactions.map((tx){
-                        final isCredit = tx.type == "credit";
-                        final txDate = DateTime.parse(tx.createdAt);
-                        return Column(
-                          children: [
-                            ListTile(
-                              contentPadding: EdgeInsets.zero,
-                              leading: Container(
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: isCredit
-                                      ? Colors.green.withValues(alpha: 0.1)
-                                      : Colors.red.withValues(alpha: 0.1),
-                                  shape: BoxShape.circle,
+                        ...transactions.map((tx) {
+                          final isCredit = tx.type == "credit";
+                          final txDate = DateTime.parse(tx.createdAt);
+                          return Column(
+                            children: [
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: isCredit
+                                        ? Colors.green.withValues(alpha: 0.1)
+                                        : Colors.red.withValues(alpha: 0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    isCredit ? Icons.add : Icons.remove,
+                                    color: isCredit ? Colors.green : Colors.red,
+                                    size: 20,
+                                  ),
                                 ),
-                                child: Icon(
-                                  isCredit ? Icons.add : Icons.remove,
-                                  color: isCredit ? Colors.green : Colors.red,
-                                  size: 20,
+                                title: AppText(tx.source),
+                                subtitle: Text(
+                                  DateFormat('hh:mm a').format(txDate),
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  "${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: isCredit ? Colors.green : Colors.red,
+                                  ),
                                 ),
                               ),
-                              title: AppText(tx.source),
-                              subtitle: Text(
-                                DateFormat('hh:mm a').format(txDate),
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              trailing: Text(
-                                "${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: isCredit ? Colors.green : Colors.red,
-                                ),
-                              ),
-                            ),
 
-                            const Divider(
-                              height: 1,
-                              color: AppColors.border,
-                            ),
-                          ],
-                        );
-                        }
-                      )],
+                              const Divider(height: 1, color: AppColors.border),
+                            ],
+                          );
+                        }),
+                      ],
                     );
                   },
                 );
@@ -144,9 +142,12 @@ class WalletScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(onPressed: (){
-        Get.to(() => const AddExpenseScreen());
-      }, label: Text('+Add Expense')),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Get.to(() => const AddExpenseScreen());
+        },
+        label: Text('+Add Expense'),
+      ),
     );
   }
 }

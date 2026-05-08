@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
@@ -38,9 +39,12 @@ class SalaryCard extends StatelessWidget {
         padding: .all(16.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade400, Colors.purple.shade400],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [
+              AppColors.secondary.withValues(alpha: 0.8),
+              AppColors.primary.withValues(alpha: 0.8),
+            ],
+            begin: Alignment.bottomLeft,
+            end: Alignment.topRight,
           ),
           borderRadius: BorderRadius.circular(16),
         ),
@@ -70,7 +74,11 @@ class SalaryCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primary,
+                  ),
                   onPressed: () {
                     Get.bottomSheet(
                       _AddSalaryBottomSheet(),
@@ -83,13 +91,8 @@ class SalaryCard extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: const Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
-                    size: 30,
-                  ),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
+                  icon: Icon(Icons.add, color: AppColors.primary, size: 24),
+                  label: Text("Add to Salary"),
                 ),
               ],
             ),

@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: .symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: .symmetric(horizontal: 16.0),
           child: SingleChildScrollView(
             child: Column(
               spacing: 16,
@@ -20,14 +20,8 @@ class HomeScreen extends StatelessWidget {
                 /// salary card
                 SalaryCard(),
 
-                /// wallet card
-                Row(
-                  spacing: 12,
-                  children: [
-                    Expanded(child: WalletCard()),
-                    Expanded(child: SavingCard()),
-                  ],
-                ),
+                /// saving card
+                SavingCard(),
               ],
             ),
           ),
