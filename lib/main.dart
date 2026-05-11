@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/controllers/hisab_controller.dart';
+import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
@@ -35,6 +36,7 @@ void main() {
   Get.put(PersonController());
   Get.put(DashboardController());
   Get.put(SettingsController());
+  Get.put(MonthlyResetController());
 
   runApp(const MyApp());
 }

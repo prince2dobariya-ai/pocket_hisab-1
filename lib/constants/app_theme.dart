@@ -7,12 +7,12 @@ class AppColors {
   static const Color accent = Color(0xFFF59E0B);
 
   // Light Theme
-  static const Color background = Color(0xFFF8FAFC);
+  static const Color background = Color(0xFFECFDF5);
   static const Color card = Color(0xFFFFFFFF);
 
   // Text Colors
-  static const Color textDark = Color(0xFF0F172A);
-  static const Color textLight = Color(0xFF64748B);
+  static const Color textDark = Color(0xFF111827);
+  static const Color textLight = Color(0xFF6B7280);
 
   // Borders
   static const Color border = Color(0xFFE2E8F0);

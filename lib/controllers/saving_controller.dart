@@ -214,9 +214,11 @@ class SavingController extends GetxController {
     // 2. Record in Hisab if it's from a friend (Borrowing)
     if (source == 'Friend') {
       final hisabCtrl = Get.find<HisabController>();
+      final personId = await hisabCtrl.getOrCreatePerson(selectedPerson!);
       await hisabCtrl.addHisab(
         HisabModel(
-          personName: selectedPerson!,
+          personId: personId,
+          personName: selectedPerson,
           type: 'borrowed',
           amount: amount,
           amountPaid: 0.0,

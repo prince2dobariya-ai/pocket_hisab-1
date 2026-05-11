@@ -1,6 +1,7 @@
 class HisabModel {
   final int? id;
-  final String personName;
+  final int personId;
+  final String? personName; // Optional, usually populated via JOIN
   final String type; // 'given' | 'borrowed'
   final double amount;
   final double amountPaid;
@@ -11,7 +12,8 @@ class HisabModel {
 
   HisabModel({
     this.id,
-    required this.personName,
+    required this.personId,
+    this.personName,
     required this.type,
     required this.amount,
     required this.amountPaid,
@@ -24,7 +26,7 @@ class HisabModel {
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
-      'person_name': personName,
+      'person_id': personId,
       'type': type,
       'amount': amount,
       'amount_paid': amountPaid,
@@ -38,7 +40,8 @@ class HisabModel {
   factory HisabModel.fromMap(Map<String, dynamic> map) {
     return HisabModel(
       id: map['id'] as int?,
-      personName: map['person_name'] as String,
+      personId: map['person_id'] as int,
+      personName: map['person_name'] as String?, // May come from JOIN
       type: map['type'] as String,
       amount: (map['amount'] as num).toDouble(),
       amountPaid: (map['amount_paid'] as num).toDouble(),
@@ -51,6 +54,7 @@ class HisabModel {
 
   HisabModel copyWith({
     int? id,
+    int? personId,
     String? personName,
     String? type,
     double? amount,
@@ -62,6 +66,7 @@ class HisabModel {
   }) {
     return HisabModel(
       id: id ?? this.id,
+      personId: personId ?? this.personId,
       personName: personName ?? this.personName,
       type: type ?? this.type,
       amount: amount ?? this.amount,

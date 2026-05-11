@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
+import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
@@ -9,6 +10,7 @@ import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/salary_model.dart';
 import 'package:pocket_hisab/controllers/saving_controller.dart';
+import 'package:pocket_hisab/screens/emi/emi_screen.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
@@ -107,8 +109,12 @@ class SalaryCard extends StatelessWidget {
               padding: .all(12.0),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.white.withAlpha(50),
+                borderRadius: .circular(12),
+                border: .all(color: Colors.blueGrey.shade50,width: 0.6),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.05),blurRadius: 8,offset: Offset(0, 2))
+                ]
               ),
               child: Column(
                 crossAxisAlignment: .start,
@@ -136,9 +142,42 @@ class SalaryCard extends StatelessWidget {
                     '$displayPercent% salary remaining',
                     style: TextStyle(fontSize: 14, color: Colors.white),
                   ),
+                  const SizedBox(height: 8),
+                  // Cycle progress row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.timelapse_rounded,
+                            size: 14,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Cycle: ${(Get.find<MonthlyResetController>().cycleProgress * 100).toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '${Get.find<MonthlyResetController>().daysRemaining} days left',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
+
             Row(
               spacing: 12,
               children: [
@@ -173,30 +212,33 @@ class SalaryCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    margin: .only(top: 16.0),
-                    padding: .all(12.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      spacing: 4,
-                      children: [
-                        Text(
-                          "EMI Paid",
-                          style: TextStyle(fontSize: 14, color: Colors.white),
-                        ),
-                        Text(
-                          CurrencyHelper.format(emiCtrl.totalMonthlyEmi),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  child: InkWell(
+                    onTap: () => Get.to(() => const EmiScreen()),
+                    child: Container(
+                      margin: .only(top: 16.0),
+                      padding: .all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: .start,
+                        spacing: 4,
+                        children: [
+                          Text(
+                            "EMI Paid",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
-                        ),
-                      ],
+                          Text(
+                            CurrencyHelper.format(emiCtrl.totalMonthlyEmi),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

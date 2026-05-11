@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
+import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/screens/expense/add_expense_screen.dart';
 import 'package:pocket_hisab/screens/hisab/person_screen.dart';
 import 'package:pocket_hisab/screens/home/home_screen.dart';
@@ -9,6 +10,7 @@ import 'package:pocket_hisab/screens/wallet/wallet_screen.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
 import 'package:get/get.dart';
 import 'package:pocket_hisab/widgets/custom_text.dart';
+import 'package:pocket_hisab/widgets/monthly_reset_dialog.dart';
 
 class HomeMain extends StatefulWidget {
   const HomeMain({super.key});
@@ -25,6 +27,14 @@ class _HomeMainState extends State<HomeMain>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    // Check for monthly reset after first frame so everything is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final resetCtrl = Get.find<MonthlyResetController>();
+      final needed = await resetCtrl.checkIfResetNeeded();
+      if (needed) {
+        await MonthlyResetDialog.show();
+      }
+    });
   }
 
   @override

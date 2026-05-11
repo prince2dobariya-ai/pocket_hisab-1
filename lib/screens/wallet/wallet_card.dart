@@ -320,8 +320,12 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
               // 2. Record in Hisab if it's from a friend (Borrowing)
               if (_sourceController.text == 'Friend') {
                 final hisabCtrl = Get.find<HisabController>();
+                final personId = await hisabCtrl.getOrCreatePerson(
+                  _selectedPerson!,
+                );
                 await hisabCtrl.addHisab(
                   HisabModel(
+                    personId: personId,
                     personName: _selectedPerson!,
                     type: 'borrowed',
                     amount: amount,

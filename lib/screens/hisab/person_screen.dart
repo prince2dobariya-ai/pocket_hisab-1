@@ -44,17 +44,18 @@ class PersonScreen extends StatelessWidget {
                 ),
                 trailing: Obx(() {
                   double balance = personController.netBalance.value;
-                  String netBalance = CurrencyHelper.format(
-                    double.parse(balance.toStringAsFixed(0)).abs(),
-                  );
-                  String balanceText = balance >= 0 ? "You pay" : "You get";
+                  String netBalance = CurrencyHelper.format(balance.abs());
+                  String balanceText = balance >= 0 ? "You get" : "You pay";
                   Color netBalanceColor = balance >= 0
                       ? Colors.green
                       : Colors.red;
                   return Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: .end,
-                    children: [AppText(netBalance), AppText(balanceText)],
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      AppText(netBalance, color: netBalanceColor),
+                      AppText(balanceText, color: netBalanceColor),
+                    ],
                   );
                 }),
               ),
@@ -120,17 +121,29 @@ class PersonScreen extends StatelessWidget {
                       subtitle: AppText(
                         "Added on ${DateFormat('dd MMM, yyyy').format(DateTime.parse(person.createdAt))}",
                       ),
-                      trailing: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // AppText(CurrencyHelper.format(person.balance?.abs().toStringAsFixed(0)),),
-                          // AppText((person.balance ?? 0) > 0 ? 'Advance' : 'Due',),
-                        ],
-                      ),
+                      trailing: person.balance == 0
+                          ? const SizedBox()
+                          : Column(
+                              mainAxisSize: .min,
+                              crossAxisAlignment: .end,
+                              children: [
+                                AppText(
+                                  CurrencyHelper.format((person.balance ?? 0).abs()),
+                                  color: (person.balance ?? 0) > 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold),
+                                AppText(
+                                  (person.balance ?? 0) > 0
+                                      ? 'You get'
+                                      : 'You pay',
+                                  color: (person.balance ?? 0) > 0
+                                      ? Colors.green
+                                      : Colors.red,
+                                ),
+                              ]),
                     );
-                  },
-                ),
+                  }),
               );
             }),
           ],

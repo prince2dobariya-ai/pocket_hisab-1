@@ -1,32 +1,66 @@
 import 'package:get/get.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
+import 'package:pocket_hisab/models/person_model.dart';
 import 'package:pocket_hisab/services/database_service.dart';
 
 class HisabController extends GetxController {
   final _db = DatabaseService();
-  static const _table = 'hisab_transactions';
+  static const _tableTransactions = 'hisab_transactions';
+  static const _tablePersons = 'persons';
 
   final RxList<HisabModel> hisabs = <HisabModel>[].obs;
+  final RxList<PersonModel> persons = <PersonModel>[].obs;
   final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchAll();
+    refreshData();
   }
 
-  Future<void> fetchAll() async {
+  Future<void> refreshData() async {
     isLoading.value = true;
-    final rows = await _db.getAll(_table);
-    hisabs.value = rows.map(HisabModel.fromMap).toList();
-    print(rows);
+    await fetchPersons();
+    await fetchTransactions();
     isLoading.value = false;
+  }
+
+  Future<void> fetchPersons() async {
+    final rows = await _db.getAll(_tablePersons);
+    persons.value = rows.map(PersonModel.fromMap).toList();
+  }
+
+  Future<void> fetchTransactions() async {
+    // Join with persons table to get person_name
+    final rows = await _db.rawQuery('''
+      SELECT t.*, p.person_name 
+      FROM $_tableTransactions t
+      JOIN $_tablePersons p ON t.person_id = p.id
+      ORDER BY t.id DESC
+    ''');
+    hisabs.value = rows.map(HisabModel.fromMap).toList();
+  }
+
+  Future<int> getOrCreatePerson(String name) async {
+    final existing = persons.firstWhereOrNull(
+      (p) => p.personName.toLowerCase() == name.toLowerCase(),
+    );
+    if (existing != null) return existing.id!;
+
+    final newPerson = PersonModel(
+      personName: name,
+      createdAt: DateTime.now().toIso8601String(),
+    );
+    final id = await _db.insert(_tablePersons, newPerson.toMap());
+    await fetchPersons();
+    return id;
   }
 
   Future<bool> addHisab(HisabModel hisab) async {
     try {
-      final id = await _db.insert(_table, hisab.toMap());
-      hisabs.insert(0, hisab.copyWith(id: id));
+      final id = await _db.insert(_tableTransactions, hisab.toMap());
+      // Re-fetch to get joined data (personName)
+      await fetchTransactions();
       return true;
     } catch (_) {
       return false;
@@ -35,9 +69,8 @@ class HisabController extends GetxController {
 
   Future<bool> updateHisab(HisabModel hisab) async {
     try {
-      await _db.update(_table, hisab.toMap(), hisab.id!);
-      final idx = hisabs.indexWhere((h) => h.id == hisab.id);
-      if (idx != -1) hisabs[idx] = hisab;
+      await _db.update(_tableTransactions, hisab.toMap(), hisab.id!);
+      await fetchTransactions();
       return true;
     } catch (_) {
       return false;
@@ -46,7 +79,7 @@ class HisabController extends GetxController {
 
   Future<bool> deleteHisab(int id) async {
     try {
-      await _db.delete(_table, id);
+      await _db.delete(_tableTransactions, id);
       hisabs.removeWhere((h) => h.id == id);
       return true;
     } catch (_) {

@@ -249,10 +249,14 @@ class _AddHisabScreenState extends State<AddHisabScreen> {
                   final hisabCtrl = Get.find<HisabController>();
                   final walletCtrl = Get.find<WalletController>();
 
+                  // Get or create person to get personId
+                  final personId = await hisabCtrl.getOrCreatePerson(nameText);
+
                   // Add Hisab
                   final type = _isBorrowed ? 'borrowed' : 'given';
                   await hisabCtrl.addHisab(
                     HisabModel(
+                      personId: personId,
                       personName: nameText,
                       type: type,
                       amount: amount,

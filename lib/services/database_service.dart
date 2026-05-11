@@ -133,7 +133,29 @@ class DatabaseService {
         FOREIGN KEY (saving_id) REFERENCES savings (id) ON DELETE CASCADE
       )
     ''');
+
+    // 10. monthly_archives
+    await _createMonthlyArchivesTable(db);
   }
+
+  Future<void> _createMonthlyArchivesTable(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS monthly_archives (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        month TEXT NOT NULL,
+        year INTEGER NOT NULL,
+        salary_amount REAL NOT NULL DEFAULT 0,
+        total_expenses REAL NOT NULL DEFAULT 0,
+        total_added_to_savings REAL NOT NULL DEFAULT 0,
+        total_added_to_wallet REAL NOT NULL DEFAULT 0,
+        wallet_balance_at_reset REAL NOT NULL DEFAULT 0,
+        savings_balance_at_reset REAL NOT NULL DEFAULT 0,
+        wallet_kept INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL
+      )
+    ''');
+  }
+
   // ─────────────────────────── Generic helpers ───────────────────────────
 
   Future<int> insert(String table, Map<String, dynamic> data) async {

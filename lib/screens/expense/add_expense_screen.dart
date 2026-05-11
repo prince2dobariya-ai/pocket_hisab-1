@@ -319,8 +319,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
               // 2. Record in Hisab if it's a friend expense
               if (_selectedCategory == 'Friend') {
+                final personId = await hisabCtrl.getOrCreatePerson(_selectedPerson!);
                 await hisabCtrl.addHisab(
                   HisabModel(
+                    personId: personId,
                     personName: _selectedPerson!,
                     type: 'given',
                     amount: amount,

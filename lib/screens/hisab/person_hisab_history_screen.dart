@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:pocket_hisab/controllers/hisab_controller.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
 import 'package:pocket_hisab/screens/hisab/add_hisab_screen.dart';
+import 'package:pocket_hisab/widgets/custom_appbar.dart';
 
 class PersonHisabHistoryScreen extends StatelessWidget {
   final String personName;
@@ -15,8 +16,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
     final hisabCtrl = Get.find<HisabController>();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: _buildAppBar(context),
+      appBar: CustomAppBar(title: personName.toUpperCase()),
       body: Column(
         children: [
           Expanded(
@@ -24,7 +24,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
               final items = hisabCtrl.hisabs
                   .where(
                     (h) =>
-                        h.personName.trim().toLowerCase() ==
+                        h.personName?.trim().toLowerCase() ==
                         personName.trim().toLowerCase(),
                   )
                   .toList();
@@ -50,6 +50,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                 ..sort((a, b) => a.compareTo(b));
 
               return ListView.builder(
+                reverse: true,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
@@ -73,25 +74,6 @@ class PersonHisabHistoryScreen extends StatelessWidget {
           ),
           _buildBottomSummary(hisabCtrl),
         ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios, color: Colors.black, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
-      title: Text(
-        personName.toUpperCase(),
-        style: const TextStyle(
-          color: Colors.black,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }
