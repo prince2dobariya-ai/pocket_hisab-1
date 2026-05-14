@@ -81,4 +81,10 @@ class EmiController extends GetxController {
 
   double get totalRemainingAmount =>
       activeEmis.fold(0.0, (sum, e) => sum + e.remainingAmount);
+
+  double get totalPaidAmount =>
+      activeEmis.fold(0.0, (sum, e) => sum + e.paidAmount);
+
+  double get totalAmount =>
+      activeEmis.fold(0.0, (sum, e) => sum + e.totalAmount);
 }

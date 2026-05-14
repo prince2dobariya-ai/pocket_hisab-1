@@ -12,7 +12,11 @@ class PersonHisabHistoryScreen extends StatelessWidget {
   final String personId;
   final String personName;
 
-  const PersonHisabHistoryScreen({super.key, required this.personId, required this.personName});
+  const PersonHisabHistoryScreen({
+    super.key,
+    required this.personId,
+    required this.personName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +29,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
           Expanded(
             child: Obx(() {
               final items = hisabCtrl.hisabs
-                  .where(
-                    (h) => h.personId == personId,
-                  )
+                  .where((h) => h.personId.toString() == personId)
                   .toList();
 
               if (items.isEmpty) {
@@ -57,7 +59,6 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   String dateStr = sortedDates[index];
                   List<HisabModel> dayItems = groupedItems[dateStr]!;
-
                   return Column(
                     children: [
                       _buildDateDivider(dateStr),
@@ -222,9 +223,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                         ),
                         backgroundColor: Colors.white,
                         shape: const RoundedRectangleBorder(
-                          borderRadius: .vertical(
-                            top: .circular(24),
-                          ),
+                          borderRadius: .vertical(top: .circular(24)),
                         ),
                       );
                     },
@@ -244,9 +243,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                         ),
                         backgroundColor: Colors.white,
                         shape: const RoundedRectangleBorder(
-                          borderRadius: .vertical(
-                            top: .circular(24),
-                          ),
+                          borderRadius: .vertical(top: .circular(24)),
                         ),
                       );
                     },
@@ -369,62 +366,67 @@ class _AddPersonHisabBottomSheetState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Toggle for Borrowed vs Lent
-          if(false)Container(
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: .circular(16),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isBorrowed = true),
-                    child: Container(
-                      padding: const .symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: _isBorrowed
-                            ? Colors.green.shade400
-                            : Colors.transparent,
-                        borderRadius: .circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Received (Borrowed)",
-                          style: TextStyle(
-                            color: _isBorrowed ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
+          if (false)
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: .circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isBorrowed = true),
+                      child: Container(
+                        padding: const .symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: _isBorrowed
+                              ? Colors.green.shade400
+                              : Colors.transparent,
+                          borderRadius: .circular(16),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Received (Borrowed)",
+                            style: TextStyle(
+                              color: _isBorrowed
+                                  ? Colors.white
+                                  : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isBorrowed = false),
-                    child: Container(
-                      padding: const .symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: !_isBorrowed
-                            ? Colors.red.shade400
-                            : Colors.transparent,
-                        borderRadius: .circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Given (Lent)",
-                          style: TextStyle(
-                            color: !_isBorrowed ? Colors.white : Colors.black54,
-                            fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isBorrowed = false),
+                      child: Container(
+                        padding: const .symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: !_isBorrowed
+                              ? Colors.red.shade400
+                              : Colors.transparent,
+                          borderRadius: .circular(16),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Given (Lent)",
+                            style: TextStyle(
+                              color: !_isBorrowed
+                                  ? Colors.white
+                                  : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           const SizedBox(height: 24),
 
           CustomTextField(
@@ -433,7 +435,6 @@ class _AddPersonHisabBottomSheetState
             keyboardType: TextInputType.number,
           ),
           const SizedBox(height: 24),
-
 
           const Text(
             "Note (Optional)",

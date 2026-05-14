@@ -38,6 +38,7 @@ class HisabController extends GetxController {
       JOIN $_tablePersons p ON t.person_id = p.id
       ORDER BY t.id DESC
     ''');
+    print(rows);
     hisabs.value = rows.map(HisabModel.fromMap).toList();
   }
 

@@ -19,9 +19,9 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
   final _totalController = TextEditingController();
   final _monthlyController = TextEditingController();
   final _paidController = TextEditingController(text: '0');
+  final _tenureController = TextEditingController(text: '12');
 
   DateTime _startDate = DateTime.now();
-  int _tenureMonths = 12;
 
   @override
   void dispose() {
@@ -29,24 +29,30 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
     _totalController.dispose();
     _monthlyController.dispose();
     _paidController.dispose();
+    _tenureController.dispose();
     super.dispose();
   }
 
   void _calculateMonthly() {
     final total = double.tryParse(_totalController.text) ?? 0;
-    if (total > 0 && _tenureMonths > 0) {
+    final paid = double.tryParse(_paidController.text) ?? 0;
+    final remaining = total - paid;
+    final tenure = int.tryParse(_tenureController.text) ?? 0;
+    if (remaining > 0 && tenure > 0) {
       setState(() {
-        _monthlyController.text = (total / _tenureMonths).toStringAsFixed(2);
+        _monthlyController.text = (remaining / tenure).toStringAsFixed(2);
       });
     }
   }
 
   void _calculateTenure() {
     final total = double.tryParse(_totalController.text) ?? 0;
+    final paid = double.tryParse(_paidController.text) ?? 0;
+    final remaining = total - paid;
     final monthly = double.tryParse(_monthlyController.text) ?? 0;
-    if (total > 0 && monthly > 0) {
+    if (remaining > 0 && monthly > 0) {
       setState(() {
-        _tenureMonths = (total / monthly).ceil();
+        _tenureController.text = (remaining / monthly).ceil().toString();
       });
     }
   }
@@ -89,6 +95,7 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                     keyboardType: TextInputType.number,
                     labelText: "Already Paid",
                     hintText: "0.00",
+                    onChange: (_) => _calculateMonthly(),
                   ),
                 ),
               ],
@@ -107,28 +114,12 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Tenure",
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        Text(
-                          "$_tenureMonths Months",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
+                  child: CustomTextField(
+                    controller: _tenureController,
+                    keyboardType: TextInputType.number,
+                    labelText: "Tenure (Months)",
+                    hintText: "12",
+                    onChange: (_) => _calculateMonthly(),
                   ),
                 ),
               ],
@@ -172,7 +163,8 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
               onTap: () async {
                 if (_nameController.text.isEmpty ||
                     _totalController.text.isEmpty ||
-                    _monthlyController.text.isEmpty) {
+                    _monthlyController.text.isEmpty ||
+                    _tenureController.text.isEmpty) {
                   Get.snackbar('Error', 'Please fill all fields');
                   return;
                 }
@@ -180,9 +172,10 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 final total = double.parse(_totalController.text);
                 final paid = double.parse(_paidController.text);
                 final monthly = double.parse(_monthlyController.text);
+                final tenureMonths = int.tryParse(_tenureController.text) ?? 12;
 
                 final endDate = _startDate.add(
-                  Duration(days: _tenureMonths * 30),
+                  Duration(days: tenureMonths * 30),
                 );
 
                 final emi = EmiModel(

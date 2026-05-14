@@ -112,17 +112,6 @@ class SettingScreen extends StatelessWidget {
               ),
             ),
           ),
-          Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const ListTile(
-              title: Text('Wallet Min Limit'),
-              subtitle: Text('Set min limit for wallet'),
-              trailing: Icon(Icons.arrow_forward_ios, size: 16),
-            ),
-          ),
 
           // ── Management section ───────────────────────────────────────────
           _SectionHeader(title: 'Management'),

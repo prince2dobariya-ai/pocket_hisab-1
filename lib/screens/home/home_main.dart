@@ -90,7 +90,11 @@ class _HomeMainState extends State<HomeMain>
         body: TabBarView(
           controller: _tabController,
           physics: NeverScrollableScrollPhysics(),
-          children: [HomeScreen(), WalletScreen(), PersonScreen()],
+          children: [
+            HomeScreen(tabController: _tabController),
+            WalletScreen(),
+            PersonScreen(),
+          ],
         ),
         floatingActionButton: FloatingActionButton(
           tooltip: 'Expense',
