@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
@@ -34,7 +33,11 @@ class EmiScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.receipt_long_rounded, size: 64, color: Colors.grey.shade300),
+                Icon(
+                  Icons.receipt_long_rounded,
+                  size: 64,
+                  color: Colors.grey.shade300,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'No EMIs added yet',
@@ -160,7 +163,9 @@ class _EmiCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = emi.totalAmount > 0 ? (emi.paidAmount / emi.totalAmount) : 0.0;
+    final progress = emi.totalAmount > 0
+        ? (emi.paidAmount / emi.totalAmount)
+        : 0.0;
     final isCompleted = emi.status == 'completed';
 
     return Card(
@@ -194,7 +199,10 @@ class _EmiCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isCompleted
                         ? Colors.green.withValues(alpha: 0.1)
@@ -215,7 +223,10 @@ class _EmiCard extends StatelessWidget {
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'delete',
-                      child: Text('Delete EMI', style: TextStyle(color: Colors.red)),
+                      child: Text(
+                        'Delete EMI',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ],
                   onSelected: (val) {
@@ -236,7 +247,10 @@ class _EmiCard extends StatelessWidget {
                 ),
                 Text(
                   '${(progress * 100).toStringAsFixed(0)}%',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -291,13 +305,20 @@ class _EmiCard extends StatelessWidget {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete EMI'),
-        content: Text('Are you sure you want to delete ${emi.name}? This action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete ${emi.name}? This action cannot be undone.',
+        ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
-              final success = await Get.find<EmiController>().deleteEmi(emi.id!);
+              final success = await Get.find<EmiController>().deleteEmi(
+                emi.id!,
+              );
               Get.back();
               if (success) {
                 Get.snackbar('Deleted', 'EMI deleted successfully');
@@ -323,7 +344,9 @@ class _EmiCard extends StatelessWidget {
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
-              final success = await Get.find<EmiController>().payInstalment(emi.id!);
+              final success = await Get.find<EmiController>().payInstalment(
+                emi.id!,
+              );
               Get.back();
               if (success) {
                 Get.snackbar('Success', 'Instalment paid successfully');

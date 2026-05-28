@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';

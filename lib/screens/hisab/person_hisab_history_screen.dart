@@ -144,7 +144,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                 Icon(icon, color: themeColor, size: 20),
                 const SizedBox(width: 4),
                 Text(
-                  "₹${item.amount.toStringAsFixed(1)}",
+                  CurrencyHelper.format(item.amount),
                   style: TextStyle(
                     color: themeColor,
                     fontSize: 18,
@@ -198,14 +198,14 @@ class PersonHisabHistoryScreen extends StatelessWidget {
               children: [
                 const Text(
                   "Amount",
-                  style: TextStyle(fontSize: 16, fontWeight: .w500),
+                  style: TextStyle(fontSize: 16, fontWeight: .bold),
                 ),
                 Text(
                   CurrencyHelper.format(netBalance.abs()),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: .bold,
-                    color: netBalance > 0 ? Colors.red : Colors.green,
+                    color: netBalance < 0 ? Colors.red : Colors.green,
                   ),
                 ),
               ],

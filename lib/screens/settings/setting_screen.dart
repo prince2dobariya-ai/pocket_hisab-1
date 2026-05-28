@@ -30,28 +30,20 @@ class SettingScreen extends StatelessWidget {
             ),
             child: ListTile(
               title: const Text('Saving Max Limit'),
-              subtitle: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Range : '),
-                  TextButton(onPressed: () {}, child: const Text('0')),
-                  const Text('   to   '),
-                  Obx(
-                    () => TextButton(
-                      onPressed: () {
-                        _showEditDialog(
-                          context,
-                          'Edit Max Saving Limit',
-                          settingsCtrl.maxSavingLimit.value,
-                          (val) => settingsCtrl.setMaxSavingLimit(val),
-                        );
-                      },
-                      child: Text(
-                        settingsCtrl.maxSavingLimit.value.toStringAsFixed(0),
-                      ),
-                    ),
+              trailing: Obx(
+                () => TextButton(
+                  onPressed: () {
+                    _showEditDialog(
+                      context,
+                      'Edit Max Saving Limit',
+                      settingsCtrl.maxSavingLimit.value,
+                      (val) => settingsCtrl.setMaxSavingLimit(val),
+                    );
+                  },
+                  child: Text(
+                    settingsCtrl.maxSavingLimit.value.toStringAsFixed(0),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -65,28 +57,20 @@ class SettingScreen extends StatelessWidget {
             ),
             child: ListTile(
               title: const Text('Wallet Max Limit'),
-              subtitle: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Range : '),
-                  TextButton(onPressed: () {}, child: const Text('0')),
-                  const Text('   to   '),
-                  Obx(
-                    () => TextButton(
-                      onPressed: () {
-                        _showEditDialog(
-                          context,
-                          'Edit Max Wallet Limit',
-                          settingsCtrl.maxWalletLimit.value,
-                          (val) => settingsCtrl.setMaxWalletLimit(val),
-                        );
-                      },
-                      child: Text(
-                        settingsCtrl.maxWalletLimit.value.toStringAsFixed(0),
-                      ),
-                    ),
+              trailing: Obx(
+                () => TextButton(
+                  onPressed: () {
+                    _showEditDialog(
+                      context,
+                      'Edit Max Wallet Limit',
+                      settingsCtrl.maxWalletLimit.value,
+                      (val) => settingsCtrl.setMaxWalletLimit(val),
+                    );
+                  },
+                  child: Text(
+                    settingsCtrl.maxWalletLimit.value.toStringAsFixed(0),
                   ),
-                ],
+                ),
               ),
             ),
           ),
@@ -262,7 +246,7 @@ class SettingScreen extends StatelessWidget {
                 mainAxisSpacing: 4,
                 crossAxisSpacing: 4,
               ),
-              itemCount: 28,
+              itemCount: 31,
               itemBuilder: (context, index) {
                 final day = index + 1;
                 final isSelected = day == currentDay;

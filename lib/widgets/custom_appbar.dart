@@ -4,10 +4,20 @@ import 'package:get/get.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget> actions;
-  const CustomAppBar({super.key, required this.title, this.actions = const []});
+  final PreferredSizeWidget? bottom;
+
+  const CustomAppBar({
+    super.key,
+    required this.title,
+    this.actions = const [],
+    this.bottom,
+  });
 
   @override
-  Size get preferredSize => Size(double.infinity, 60);
+  Size get preferredSize {
+    double bottomHeight = bottom?.preferredSize.height ?? 0.0;
+    return Size(double.infinity, 60 + bottomHeight);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Text(title),
       centerTitle: Navigator.canPop(context) ? true : false,
       actions: actions,
+      bottom: bottom,
     );
   }
 }

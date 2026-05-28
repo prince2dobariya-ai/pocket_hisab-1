@@ -17,77 +17,100 @@ class AllTransactionsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final txCtrl = Get.find<TransactionController>();
 
-    return Scaffold(
-      appBar: CustomAppBar(title: "All Transactions"),
-      body: Obx(() {
-        final walletCtrl = Get.find<WalletController>();
-        final savingCtrl = Get.find<SavingController>();
-        if (txCtrl.isLoading.value ||
-            walletCtrl.isLoading.value ||
-            savingCtrl.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final mergedItems = _getMergedTransactions(
-          txCtrl.expenses,
-          walletCtrl.transactions,
-          savingCtrl.transactions,
-        );
-
-        if (mergedItems.isEmpty) {
-          return const Center(child: Text("No transactions found"));
-        }
-
-        // Grouping by date
-        Map<String, List<_AllMergedTransaction>> grouped = {};
-        for (var item in mergedItems) {
-          if (!grouped.containsKey(item.displayDate)) {
-            grouped[item.displayDate] = [];
+    return DefaultTabController(
+      length: 4,
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: "All Transactions",
+          bottom: const TabBar(
+            isScrollable: true,
+            tabs: [
+              Tab(text: "All"),
+              Tab(text: "Expenses"),
+              Tab(text: "Wallet"),
+              Tab(text: "Savings"),
+            ],
+          ),
+        ),
+        body: Obx(() {
+          final walletCtrl = Get.find<WalletController>();
+          final savingCtrl = Get.find<SavingController>();
+          if (txCtrl.isLoading.value ||
+              walletCtrl.isLoading.value ||
+              savingCtrl.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
           }
-          grouped[item.displayDate]!.add(item);
-        }
 
-        final sortedDates = grouped.keys.toList();
+          final expenseItems = _getExpenseTransactions(txCtrl.expenses);
+          final walletItems = _getWalletTransactions(walletCtrl.transactions);
+          final savingItems = _getSavingTransactions(savingCtrl.transactions);
 
-        return ListView.builder(
-          padding: .all(16),
-          itemCount: sortedDates.length,
-          itemBuilder: (context, dateIndex) {
-            String dateStr = sortedDates[dateIndex];
-            List<_AllMergedTransaction> dayItems = grouped[dateStr]!;
+          final allItems = [...expenseItems, ...walletItems, ...savingItems];
+          allItems.sort((a, b) => b.dateTime.compareTo(a.dateTime));
 
-            return Column(
-              crossAxisAlignment: .start,
-              children: [
-                Padding(
-                  padding: .symmetric(vertical: 12.0),
-                  child: Text(
-                    dateStr,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: .bold,
-                      color: Colors.black54,
-                    ),
-                  ),
-                ),
-                ...dayItems.map((item) => _buildTransactionCard(item)),
-              ],
-            );
-          },
-        );
-      }),
+          return TabBarView(
+            children: [
+              _buildTransactionList(allItems),
+              _buildTransactionList(expenseItems),
+              _buildTransactionList(walletItems),
+              _buildTransactionList(savingItems),
+            ],
+          );
+        }),
+      ),
     );
   }
 
-  List<_AllMergedTransaction> _getMergedTransactions(
-    List<ExpenseModel> expenses,
-    List<TransactionModel> walletTxs,
-    List<SavingTransactionModel> savingTxs,
-  ) {
-    List<_AllMergedTransaction> merged = [];
+  Widget _buildTransactionList(List<_AllMergedTransaction> items) {
+    if (items.isEmpty) {
+      return const Center(child: Text("No transactions found"));
+    }
 
+    // Grouping by date
+    Map<String, List<_AllMergedTransaction>> grouped = {};
+    for (var item in items) {
+      if (!grouped.containsKey(item.displayDate)) {
+        grouped[item.displayDate] = [];
+      }
+      grouped[item.displayDate]!.add(item);
+    }
+
+    final sortedDates = grouped.keys.toList();
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: sortedDates.length,
+      itemBuilder: (context, dateIndex) {
+        String dateStr = sortedDates[dateIndex];
+        List<_AllMergedTransaction> dayItems = grouped[dateStr]!;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12.0),
+              child: Text(
+                dateStr,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black54,
+                ),
+              ),
+            ),
+            ...dayItems.map((item) => _buildTransactionCard(item)),
+          ],
+        );
+      },
+    );
+  }
+
+  List<_AllMergedTransaction> _getExpenseTransactions(
+    List<ExpenseModel> expenses,
+  ) {
+    List<_AllMergedTransaction> list = [];
     for (var e in expenses) {
-      merged.add(
+      list.add(
         _AllMergedTransaction(
           title: e.category,
           subtitle: e.note,
@@ -101,13 +124,20 @@ class AllTransactionsScreen extends StatelessWidget {
         ),
       );
     }
+    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    return list;
+  }
 
+  List<_AllMergedTransaction> _getWalletTransactions(
+    List<TransactionModel> walletTxs,
+  ) {
+    List<_AllMergedTransaction> list = [];
     for (var t in walletTxs) {
       bool isExpenseLinked =
           t.source.startsWith('Expense:') || t.source.startsWith('Lent to');
       if (t.type == 'credit' || (t.type == 'debit' && !isExpenseLinked)) {
         DateTime dt = DateTime.parse(t.createdAt);
-        merged.add(
+        list.add(
           _AllMergedTransaction(
             title: t.source,
             subtitle: t.note,
@@ -124,12 +154,19 @@ class AllTransactionsScreen extends StatelessWidget {
         );
       }
     }
+    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    return list;
+  }
 
+  List<_AllMergedTransaction> _getSavingTransactions(
+    List<SavingTransactionModel> savingTxs,
+  ) {
+    List<_AllMergedTransaction> list = [];
     for (var t in savingTxs) {
       if (t.source == 'Wallet') continue;
 
       DateTime dt = DateTime.parse(t.createdAt);
-      merged.add(
+      list.add(
         _AllMergedTransaction(
           title: 'Saving (${t.source})',
           subtitle: t.note,
@@ -145,15 +182,14 @@ class AllTransactionsScreen extends StatelessWidget {
         ),
       );
     }
-
-    merged.sort((a, b) => b.dateTime.compareTo(a.dateTime));
-    return merged;
+    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+    return list;
   }
 
   Widget _buildTransactionCard(_AllMergedTransaction item) {
     return Container(
-      margin: .only(bottom: 12),
-      padding: .all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -168,7 +204,7 @@ class AllTransactionsScreen extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: .all(10),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: item.color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
@@ -178,11 +214,14 @@ class AllTransactionsScreen extends StatelessWidget {
           const SizedBox(width: 16),
           Expanded(
             child: Column(
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   item.title,
-                  style: const TextStyle(fontWeight: .bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 if (item.subtitle != null && item.subtitle!.isNotEmpty)
                   Text(
@@ -193,12 +232,12 @@ class AllTransactionsScreen extends StatelessWidget {
             ),
           ),
           Column(
-            crossAxisAlignment: .end,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 "${item.isCredit ? '+' : '-'} ${CurrencyHelper.format(item.amount)}",
                 style: TextStyle(
-                  fontWeight: .bold,
+                  fontWeight: FontWeight.bold,
                   fontSize: 16,
                   color: item.isCredit ? Colors.green : Colors.redAccent,
                 ),

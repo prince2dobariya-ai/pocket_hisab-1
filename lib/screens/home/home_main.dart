@@ -4,6 +4,7 @@ import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/screens/expense/add_expense_screen.dart';
 import 'package:pocket_hisab/screens/hisab/person_screen.dart';
+import 'package:pocket_hisab/screens/home/all_transactions_screen.dart';
 import 'package:pocket_hisab/screens/home/home_screen.dart';
 import 'package:pocket_hisab/screens/settings/setting_screen.dart';
 import 'package:pocket_hisab/screens/wallet/wallet_screen.dart';
@@ -27,6 +28,9 @@ class _HomeMainState extends State<HomeMain>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {});
+    });
     // Check for monthly reset after first frame so everything is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final resetCtrl = Get.find<MonthlyResetController>();
@@ -79,6 +83,12 @@ class _HomeMainState extends State<HomeMain>
         appBar: CustomAppBar(
           title: "Khissu",
           actions: [
+            IconButton(
+              onPressed: () {
+                Get.to(() => AllTransactionsScreen());
+              },
+              icon: Icon(Icons.history_outlined),
+            ),
             IconButton(
               onPressed: () {
                 Get.to(() => SettingScreen());
