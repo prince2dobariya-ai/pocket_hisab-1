@@ -90,7 +90,7 @@ class SalaryCard extends StatelessWidget {
                   ),
                   onPressed: () {
                     Get.bottomSheet(
-                      _AddSalaryBottomSheet(),
+                      const AddSalaryBottomSheet(),
                       isScrollControlled: true,
                       backgroundColor: Colors.white,
                       shape: const RoundedRectangleBorder(
@@ -275,12 +275,14 @@ class SalaryCard extends StatelessWidget {
   }
 }
 
-class _AddSalaryBottomSheet extends StatefulWidget {
+class AddSalaryBottomSheet extends StatefulWidget {
+  const AddSalaryBottomSheet({super.key});
+
   @override
-  State<_AddSalaryBottomSheet> createState() => _AddSalaryBottomSheetState();
+  State<AddSalaryBottomSheet> createState() => AddSalaryBottomSheetState();
 }
 
-class _AddSalaryBottomSheetState extends State<_AddSalaryBottomSheet> {
+class AddSalaryBottomSheetState extends State<AddSalaryBottomSheet> {
   final _amountController = TextEditingController();
   final _monthController = TextEditingController(text: _getCurrentMonth());
 

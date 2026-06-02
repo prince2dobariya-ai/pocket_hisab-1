@@ -68,7 +68,7 @@ class SavingCard extends StatelessWidget {
                     ),
                     onPressed: () {
                       Get.bottomSheet(
-                        _AddSavingBottomSheet(),
+                        const AddSavingBottomSheet(),
                         isScrollControlled: true,
                         backgroundColor: Colors.white,
                         shape: const RoundedRectangleBorder(
@@ -110,12 +110,14 @@ class SavingCard extends StatelessWidget {
   }
 }
 
-class _AddSavingBottomSheet extends StatefulWidget {
+class AddSavingBottomSheet extends StatefulWidget {
+  const AddSavingBottomSheet({super.key});
+
   @override
-  State<_AddSavingBottomSheet> createState() => _AddSavingBottomSheetState();
+  State<AddSavingBottomSheet> createState() => AddSavingBottomSheetState();
 }
 
-class _AddSavingBottomSheetState extends State<_AddSavingBottomSheet> {
+class AddSavingBottomSheetState extends State<AddSavingBottomSheet> {
   final _amountController = TextEditingController();
   final _sourceController = TextEditingController(text: "Salary");
   final walletCtrl = Get.find<WalletController>();

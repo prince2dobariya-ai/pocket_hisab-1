@@ -649,7 +649,7 @@ class _AddPersonBottomSheetState extends State<_AddPersonBottomSheet> {
                 );
                 Get.back();
               },
-              title: "Create Account",
+              title: "Add Person",
             ),
           ),
         ],

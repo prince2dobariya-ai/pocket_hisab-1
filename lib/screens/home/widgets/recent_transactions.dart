@@ -7,6 +7,7 @@ import 'package:pocket_hisab/models/expense_model.dart';
 import 'package:pocket_hisab/models/transaction_model.dart';
 import 'package:pocket_hisab/controllers/saving_controller.dart';
 import 'package:pocket_hisab/models/saving_transaction_model.dart';
+import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/screens/home/all_transactions_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -23,12 +24,14 @@ class RecentTransactions extends StatelessWidget {
         Row(
           mainAxisAlignment: .spaceBetween,
           children: [
-            const Text(
+            Text(
               "Recent Transactions",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
               ),
             ),
             TextButton(
@@ -53,7 +56,7 @@ class RecentTransactions extends StatelessWidget {
           );
 
           if (mergedItems.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
           // Grouping by date
@@ -82,7 +85,7 @@ class RecentTransactions extends StatelessWidget {
                 crossAxisAlignment: .start,
                 children: [
                   _buildDateHeader(dateStr),
-                  ...items.map((item) => _buildMergedItem(item)),
+                  ...items.map((item) => _buildMergedItem(context, item)),
                 ],
               );
             },
@@ -185,12 +188,14 @@ class RecentTransactions extends StatelessWidget {
     return merged;
   }
 
-  Widget _buildMergedItem(_MergedTransaction item) {
+  Widget _buildMergedItem(BuildContext context, _MergedTransaction item) {
     return Container(
       margin: .only(bottom: 12),
       padding: .all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkCard
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -288,23 +293,27 @@ class RecentTransactions extends StatelessWidget {
     }
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      padding: .all(24),
-      width: double.infinity,
+      padding: const .all(24),
+      width: .infinity,
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200, style: .solid),
+        color: isDark ? AppColors.darkCard : Colors.grey.shade50,
+        borderRadius: .circular(20),
+        border: .all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          style: .solid,
+        ),
       ),
       child: Column(
+        spacing: 12,
         children: [
           Icon(
             Icons.receipt_long_outlined,
             size: 48,
             color: Colors.grey.shade300,
           ),
-          const SizedBox(height: 12),
           Text(
             "No transactions yet",
             style: TextStyle(color: Colors.grey.shade500, fontWeight: .w500),

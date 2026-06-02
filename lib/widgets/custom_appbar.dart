@@ -22,7 +22,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: Navigator.canPop(context) ? null : const _AnimatedLogo(),
+      leading: Navigator.canPop(context) ? null : const AnimatedLogo(),
       title: Text(title),
       centerTitle: Navigator.canPop(context) ? true : false,
       actions: actions,
@@ -31,14 +31,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class _AnimatedLogo extends StatefulWidget {
-  const _AnimatedLogo();
+class AnimatedLogo extends StatefulWidget {
+  const AnimatedLogo({super.key});
 
   @override
-  State<_AnimatedLogo> createState() => _AnimatedLogoState();
+  State<AnimatedLogo> createState() => AnimatedLogoState();
 }
 
-class _AnimatedLogoState extends State<_AnimatedLogo>
+class AnimatedLogoState extends State<AnimatedLogo>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
