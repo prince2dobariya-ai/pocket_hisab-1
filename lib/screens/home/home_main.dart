@@ -118,7 +118,7 @@ class _HomeMainState extends State<HomeMain>
         bottomNavigationBar: BottomAppBar(
           shape: CircularNotchedRectangle(),
           notchMargin: 6,
-          height: 82,
+          height: 80,
           padding: .symmetric(vertical: 4, horizontal: 16),
           child: Row(
             mainAxisAlignment: .spaceBetween,
@@ -133,7 +133,7 @@ class _HomeMainState extends State<HomeMain>
                   children: [
                     Icon(
                       Icons.dashboard_outlined,
-                      size: 32,
+                      size: 30,
                       color: _tabController.index == 0
                           ? AppColors.primary
                           : Colors.grey,
@@ -143,6 +143,7 @@ class _HomeMainState extends State<HomeMain>
                       color: _tabController.index == 0
                           ? AppColors.primary
                           : Colors.grey,
+                      fontWeight: _tabController.index == 0 ? .bold : null,
                     ),
                   ],
                 ),
@@ -157,7 +158,7 @@ class _HomeMainState extends State<HomeMain>
                   children: [
                     Icon(
                       Icons.account_balance_wallet_outlined,
-                      size: 32,
+                      size: 30,
                       color: _tabController.index == 1
                           ? AppColors.primary
                           : Colors.grey,
@@ -167,6 +168,7 @@ class _HomeMainState extends State<HomeMain>
                       color: _tabController.index == 1
                           ? AppColors.primary
                           : Colors.grey,
+                      fontWeight: _tabController.index == 1 ? .bold : null,
                     ),
                   ],
                 ),
@@ -181,7 +183,7 @@ class _HomeMainState extends State<HomeMain>
                   children: [
                     Icon(
                       Icons.group_outlined,
-                      size: 32,
+                      size: 30,
                       color: _tabController.index == 2
                           ? AppColors.primary
                           : Colors.grey,
@@ -191,6 +193,7 @@ class _HomeMainState extends State<HomeMain>
                       color: _tabController.index == 2
                           ? AppColors.primary
                           : Colors.grey,
+                      fontWeight: _tabController.index == 2 ? .bold : null,
                     ),
                   ],
                 ),

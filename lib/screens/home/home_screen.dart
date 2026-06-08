@@ -64,12 +64,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: NotificationListener(
           onNotification: (notification) {
             if (notification is ScrollNotification) {
-              if (notification.metrics.pixels < -150) {
+              if (notification.metrics.pixels < -145) {
                 final now = DateTime.now();
 
                 if (lastTriggered == null ||
                     now.difference(lastTriggered!) >
-                        const Duration(seconds: 3)) {
+                        const Duration(seconds: 5)) {
                   final randomMessage = getContextualEasterEgg(
                     salaryLeft: salaryCtrl.latestSalary != null
                         ? (salaryCtrl.latestSalary!.amount -
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(randomMessage),
-                      duration: Duration(seconds: 3),
+                      duration: Duration(seconds: 4),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
