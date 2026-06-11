@@ -45,7 +45,6 @@ class DashboardController extends GetxController {
   double get salaryLeft =>
       latestSalary -
       _walletCtrl.totalAddedFromSalary -
-      _emiCtrl.totalMonthlyEmi -
       _expenseCtrl.totalSalaryExpenses -
       _savingCtrl.totalAddedFromSalary;
 }

@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 final salaryLeft =
                     latestSalary -
                     walletAdded -
-                    emiPaid -
+                    // emiPaid -
                     salarySpent -
                     savingAdded;
                 final percentage = latestSalary > 0

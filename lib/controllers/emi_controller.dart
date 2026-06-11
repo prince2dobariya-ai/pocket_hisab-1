@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:pocket_hisab/controllers/transaction_controller.dart';
+import 'package:pocket_hisab/models/expense_model.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
 import 'package:pocket_hisab/services/database_service.dart';
 
@@ -68,7 +71,25 @@ class EmiController extends GetxController {
       remainingAmount: newRemaining.clamp(0, emi.totalAmount),
       status: newStatus,
     );
-    return updateEmi(updated);
+    final success = await updateEmi(updated);
+    if (success) {
+      try {
+        final txCtrl = Get.find<TransactionController>();
+        await txCtrl.addExpense(
+          ExpenseModel(
+            category: 'EMI',
+            amount: emi.monthlyAmount,
+            note: 'EMI Payment: ${emi.name}',
+            date: DateFormat('d/M/yyyy').format(DateTime.now()),
+            createdAt: DateTime.now().toIso8601String(),
+            paymentMethod: 'Salary',
+          ),
+        );
+      } catch (e) {
+        print('Error adding EMI expense: $e');
+      }
+    }
+    return success;
   }
 
   // ── Derived ─────────────────────────────────────────────────────────────
