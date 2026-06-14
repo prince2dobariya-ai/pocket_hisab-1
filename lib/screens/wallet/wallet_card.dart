@@ -17,6 +17,8 @@ class WalletCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final salaryCtrl = Get.find<SalaryController>();
     final walletCtrl = Get.find<WalletController>();
     final emiCtrl = Get.find<EmiController>();
@@ -40,7 +42,13 @@ class WalletCard extends StatelessWidget {
         padding: .all(16.0),
         margin: .symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: AppColors.primary.withAlpha(222),
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF0F766E), const Color(0xFF115E59)]
+                : [AppColors.primary, AppColors.secondary],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           borderRadius: .circular(12),
           border: .all(color: Colors.blueGrey.shade50, width: 0.6),
           boxShadow: [
@@ -57,20 +65,21 @@ class WalletCard extends StatelessWidget {
               mainAxisAlignment: .spaceBetween,
               children: [
                 Column(
-                  crossAxisAlignment: .start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       "Wallet Balance",
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        fontSize: 13,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 6),
                     Text(
                       CurrencyHelper.format(totalWalletBalance),
-                      style: TextStyle(
-                        fontSize: 30,
+                      style: const TextStyle(
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -79,14 +88,27 @@ class WalletCard extends StatelessWidget {
                 ),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3),
+                      ),
+                    ),
                   ),
                   onPressed: () {
                     Get.bottomSheet(
                       _AddWalletBottomSheet(),
                       isScrollControlled: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: isDark
+                          ? AppColors.darkCard
+                          : Colors.white,
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(
                           top: Radius.circular(20),
@@ -94,49 +116,14 @@ class WalletCard extends StatelessWidget {
                       ),
                     );
                   },
-                  icon: Icon(Icons.add, color: AppColors.primary, size: 24),
-                  label: Text("Add to Wallet"),
+                  icon: const Icon(Icons.add_circle_outline, size: 16),
+                  label: const Text(
+                    "Add Wallet",
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
-            if (false)
-              Container(
-                margin: .only(top: 16.0),
-                padding: .all(12.0),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: .start,
-                  spacing: 4,
-                  children: [
-                    Text(
-                      "Current Wallet Balance",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                    Text(
-                      "₹${walletCtrl.totalBalance.toStringAsFixed(0)}",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    LinearProgressIndicator(
-                      value: percentage.clamp(0.0, 1.0),
-                      color: percentage > 0.3 ? Colors.green : Colors.red,
-                      minHeight: 12,
-                      borderRadius: .circular(12),
-                    ),
-                    Text(
-                      '$displayPercent% balance remaining',
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ),
           ],
         ),
       );

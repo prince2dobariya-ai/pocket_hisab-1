@@ -64,7 +64,7 @@ class WalletScreen extends StatelessWidget {
             child: Row(
               children: [
                 const AppText(
-                  'Transactions',
+                  'Wallet Transactions',
                   fontWeight: FontWeight.bold,
                   size: 17,
                 ),
