@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
+import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
 import 'package:pocket_hisab/models/person_model.dart';
 import 'package:pocket_hisab/services/database_service.dart';
@@ -90,6 +91,25 @@ class HisabController extends GetxController {
 
   Future<bool> deleteHisab(int id) async {
     try {
+      final hisab = hisabs.firstWhereOrNull((h) => h.id == id);
+      if (hisab == null) return false;
+
+      // 1. If it was not an old record, we should revert wallet balance
+      if (!hisab.isOld) {
+        final walletCtrl = Get.find<WalletController>();
+        // Try to find the linked wallet transaction
+        final linkedTx = walletCtrl.transactions.firstWhereOrNull(
+          (t) =>
+              t.amount == hisab.amount &&
+              t.source == 'Hisab: ${hisab.personName}',
+        );
+
+        if (linkedTx != null) {
+          await walletCtrl.deleteTransaction(linkedTx.id!);
+        }
+      }
+
+      // 2. Delete hisab record
       await _db.delete(_tableTransactions, id);
       hisabs.removeWhere((h) => h.id == id);
       if (Get.isRegistered<PersonController>()) {

@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
+import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/transaction_model.dart';
+import 'package:pocket_hisab/controllers/hisab_controller.dart';
 import 'package:pocket_hisab/screens/wallet/wallet_card.dart';
 import 'package:pocket_hisab/widgets/custom_text.dart';
 
@@ -236,6 +238,15 @@ class _DateGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double totalIncome = transactions
+        .where((e) => e.type == 'credit')
+        .map((e) => e.amount)
+        .fold(0, (a, b) => a + b);
+    final double totalExpense = transactions
+        .where((e) => e.type == 'debit')
+        .map((e) => e.amount)
+        .fold(0, (a, b) => a + b);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,6 +254,7 @@ class _DateGroup extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
           child: Row(
+            spacing: 8,
             children: [
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -260,8 +272,19 @@ class _DateGroup extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
               Expanded(child: Container(height: 1, color: AppColors.border)),
+              AppText(
+                '+${totalIncome == 0 ? 0 : CurrencyHelper.format(totalIncome)}',
+                size: 12,
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+              AppText(
+                '-${CurrencyHelper.format(totalExpense > 0 ? totalExpense : 0)}',
+                size: 12,
+                color: AppColors.danger,
+                fontWeight: FontWeight.w600,
+              ),
             ],
           ),
         ),
@@ -306,52 +329,133 @@ class _TransactionCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        leading: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-          child: Icon(icon, color: color, size: 22),
-        ),
-        title: AppText(tx.source, size: 14, fontWeight: FontWeight.w600),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Row(
-            children: [
-              Icon(
-                Icons.access_time_rounded,
-                size: 11,
-                color: Colors.grey.shade400,
-              ),
-              const SizedBox(width: 3),
-              AppText(timeStr, size: 11, color: AppColors.textLight),
-              if (tx.note != null && tx.note!.isNotEmpty) ...[
-                const SizedBox(width: 8),
-                const Text(
-                  '·',
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-                const SizedBox(width: 6),
-                Flexible(
-                  child: AppText(
-                    tx.note!,
-                    size: 11,
-                    color: AppColors.textLight,
-                    maxLines: 1,
+      child: Material(
+        color: Colors.transparent,
+        child: ListTile(
+          onLongPress: () {
+            if (tx.id != null) {
+              Get.dialog(
+                AlertDialog(
+                  title: const Text("Delete Transaction"),
+                  content: const Text(
+                    "Are you sure you want to delete this transaction?",
                   ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Get.back(),
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        Get.back();
+                        bool success = false;
+                        if (tx.source.startsWith('Hisab: ')) {
+                          final personName = tx.source.replaceFirst(
+                            'Hisab: ',
+                            '',
+                          );
+                          final hisabCtrl = Get.find<HisabController>();
+                          final linkedHisab = hisabCtrl.hisabs.firstWhereOrNull(
+                            (h) =>
+                                h.personName == personName &&
+                                h.amount == tx.amount,
+                          );
+                          if (linkedHisab != null) {
+                            success = await hisabCtrl.deleteHisab(
+                              linkedHisab.id!,
+                            );
+                          } else {
+                            success = await Get.find<WalletController>()
+                                .deleteTransaction(tx.id!);
+                          }
+                        } else if (tx.source.startsWith('Expense: ') ||
+                            tx.source.startsWith('Lent to ')) {
+                          final txCtrl = Get.find<TransactionController>();
+                          final linkedExpense = txCtrl.expenses
+                              .firstWhereOrNull(
+                                (e) =>
+                                    e.amount == tx.amount &&
+                                    (tx.source == 'Expense: ${e.category}' ||
+                                        tx.source.startsWith('Lent to ')),
+                              );
+                          if (linkedExpense != null) {
+                            success = await txCtrl.deleteExpense(
+                              linkedExpense.id!,
+                            );
+                          } else {
+                            success = await Get.find<WalletController>()
+                                .deleteTransaction(tx.id!);
+                          }
+                        } else {
+                          success = await Get.find<WalletController>()
+                              .deleteTransaction(tx.id!);
+                        }
+
+                        if (success) {
+                          Get.snackbar("Success", "Transaction deleted");
+                        } else {
+                          Get.snackbar("Error", "Failed to delete transaction");
+                        }
+                      },
+                      child: const Text(
+                        "Delete",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ],
+              );
+            }
+          },
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 6,
           ),
-        ),
-        trailing: Text(
-          '${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-            color: color,
-            letterSpacing: -0.3,
+          leading: Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          title: AppText(tx.source, size: 14, fontWeight: FontWeight.w600),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 11,
+                  color: Colors.grey.shade400,
+                ),
+                const SizedBox(width: 3),
+                AppText(timeStr, size: 11, color: AppColors.textLight),
+                if (tx.note != null && tx.note!.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  const Text(
+                    '·',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: AppText(
+                      tx.note!,
+                      size: 11,
+                      color: AppColors.textLight,
+                      maxLines: 1,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          trailing: Text(
+            '${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: color,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
       ),

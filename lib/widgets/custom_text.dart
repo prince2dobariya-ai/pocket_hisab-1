@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
-import 'package:pocket_hisab/helpers/currency_helper.dart';
 
 class AppText extends StatelessWidget {
   final String text;

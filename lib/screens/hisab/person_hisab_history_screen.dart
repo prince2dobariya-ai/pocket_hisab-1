@@ -8,6 +8,7 @@ import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class PersonHisabHistoryScreen extends StatelessWidget {
@@ -116,47 +117,73 @@ class PersonHisabHistoryScreen extends StatelessWidget {
       }
     } catch (_) {}
 
-    return Container(
-      width: double.infinity,
-      alignment: isGiven ? Alignment.centerRight : Alignment.centerLeft,
-      margin: const EdgeInsets.only(bottom: 8),
+    return GestureDetector(
+      onLongPress: () {
+        if (item.id != null) {
+          _showDeleteDialog(item);
+        }
+      },
       child: Container(
-        constraints: BoxConstraints(maxWidth: Get.width * 0.75),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: themeColor, size: 20),
-                const SizedBox(width: 4),
-                Text(
-                  CurrencyHelper.format(item.amount),
-                  style: TextStyle(
-                    color: themeColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        width: double.infinity,
+        alignment: isGiven ? Alignment.centerRight : Alignment.centerLeft,
+        margin: const EdgeInsets.only(bottom: 8),
+        child: Container(
+          constraints: BoxConstraints(maxWidth: Get.width * 0.75),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade300),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, color: themeColor, size: 20),
+                  const SizedBox(width: 4),
+                  Text(
+                    CurrencyHelper.format(item.amount),
+                    style: TextStyle(
+                      color: themeColor,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  time,
-                  style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
-                ),
-                if (item.isOld) ...[
+                  const SizedBox(width: 8),
+                  Text(
+                    time,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
+                  if (item.isOld) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Text(
+                        "Old",
+                        style: TextStyle(
+                          color: Colors.deepOrange,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(width: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -164,31 +191,68 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange.shade100,
+                      color: item.paymentType == 'UPI'
+                          ? Colors.blue.shade50
+                          : Colors.green.shade50,
                       borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: item.paymentType == 'UPI'
+                            ? Colors.blue.shade200
+                            : Colors.green.shade200,
+                      ),
                     ),
-                    child: const Text(
-                      "Old",
+                    child: Text(
+                      item.paymentType,
                       style: TextStyle(
-                        color: Colors.deepOrange,
+                        color: item.paymentType == 'UPI'
+                            ? Colors.blue.shade700
+                            : Colors.green.shade700,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ],
-              ],
-            ),
-            if (item.note != null && item.note!.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  item.note!,
-                  style: const TextStyle(color: Colors.black87, fontSize: 14),
-                ),
               ),
-          ],
+              if (item.note != null && item.note!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    item.note!,
+                    style: const TextStyle(color: Colors.black87, fontSize: 14),
+                  ),
+                ),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(HisabModel item) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Delete Record"),
+        content: const Text(
+          "Are you sure you want to delete this hisab record?",
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              final success = await Get.find<HisabController>().deleteHisab(
+                item.id!,
+              );
+              if (success) {
+                Get.snackbar("Success", "Record deleted");
+              } else {
+                Get.snackbar("Error", "Failed to delete record");
+              }
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }
@@ -338,18 +402,20 @@ class _AddPersonHisabBottomSheetState
   late final TextEditingController _amountController;
   late final TextEditingController _noteController;
   late final TextEditingController _dateController;
+  late DateTime _selectedDate;
 
   late bool _isBorrowed;
   bool _isOldMoney = false;
+  String _paymentType = 'Cash'; // Cash or UPI
 
   @override
   void initState() {
     super.initState();
     _amountController = TextEditingController();
     _noteController = TextEditingController();
+    _selectedDate = DateTime.now();
     _dateController = TextEditingController(
-      text:
-          "${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}",
+      text: "${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}",
     );
     _isBorrowed = widget.isBorrowed ?? true;
   }
@@ -365,12 +431,13 @@ class _AddPersonHisabBottomSheetState
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
     if (picked != null) {
       setState(() {
+        _selectedDate = picked;
         _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
       });
     }
@@ -383,87 +450,37 @@ class _AddPersonHisabBottomSheetState
         left: 16.0,
         right: 16.0,
         top: 12.0,
-        bottom: MediaQuery.of(context).padding.bottom + 16.0,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       child: Column(
         mainAxisSize: .min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: .start,
         children: [
-          // Toggle for Borrowed vs Lent
-          if (false)
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: .circular(16),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _isBorrowed = true),
-                      child: Container(
-                        padding: const .symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: _isBorrowed
-                              ? Colors.green.shade400
-                              : Colors.transparent,
-                          borderRadius: .circular(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Received (Borrowed)",
-                            style: TextStyle(
-                              color: _isBorrowed
-                                  ? Colors.white
-                                  : Colors.black54,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() => _isBorrowed = false),
-                      child: Container(
-                        padding: const .symmetric(vertical: 12),
-                        decoration: BoxDecoration(
-                          color: !_isBorrowed
-                              ? Colors.red.shade400
-                              : Colors.transparent,
-                          borderRadius: .circular(16),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "Given (Lent)",
-                            style: TextStyle(
-                              color: !_isBorrowed
-                                  ? Colors.white
-                                  : Colors.black54,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           const SizedBox(height: 24),
-
-          CustomTextField(
-            controller: _amountController,
-            labelText: "Amount",
-            keyboardType: TextInputType.number,
+          Row(
+            children: [
+              Expanded(
+                flex: 4,
+                child: CustomTextField(
+                  controller: _amountController,
+                  labelText: "Amount",
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                flex: 3,
+                child: CustomTextField(
+                  controller: _dateController,
+                  labelText: "Date",
+                  readOnly: true,
+                  onTap: () => _selectDate(context),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 24),
-
-          const Text(
-            "Note (Optional)",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+          const AppText("Note (Optional)"),
           const SizedBox(height: 8),
           CustomTextField(
             controller: _noteController,
@@ -482,13 +499,57 @@ class _AddPersonHisabBottomSheetState
                   });
                 },
               ),
-              const Expanded(
-                child: Text(
+              Expanded(
+                child: AppText(
                   "Mark as Old Record (Does not calculate in balance)",
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  size: 12,
+                  maxLines: 2,
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 12),
+          const AppText("Payment Type"),
+          const SizedBox(height: 8),
+          Row(
+            children: ['Cash', 'UPI'].map((type) {
+              final isSelected = _paymentType == type;
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _paymentType = type;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      type,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
           const SizedBox(height: 16),
           CustomButton(
@@ -523,11 +584,12 @@ class _AddPersonHisabBottomSheetState
                   type: type,
                   amount: amount,
                   note: _noteController.text.trim(),
-                  createdAt: DateTime.now().toIso8601String(),
+                  createdAt: _selectedDate.toIso8601String(),
                   status: 'pending',
                   amountPaid: 0,
                   remainingAmount: amount,
                   isOld: _isOldMoney,
+                  paymentType: _paymentType,
                 ),
               );
 
@@ -540,6 +602,7 @@ class _AddPersonHisabBottomSheetState
                     amount: amount,
                     source: 'Hisab: ${widget.personName}',
                     note: 'Received from ${widget.personName}',
+                    paymentType: _paymentType,
                   );
                 } else {
                   await walletCtrl.debit(
@@ -547,6 +610,7 @@ class _AddPersonHisabBottomSheetState
                     amount: amount,
                     source: 'Hisab: ${widget.personName}',
                     note: 'Given to ${widget.personName}',
+                    paymentType: _paymentType,
                   );
                 }
               } else {

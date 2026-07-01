@@ -145,6 +145,23 @@ class SavingController extends GetxController {
 
   Future<bool> deleteTransaction(int id) async {
     try {
+      final tx = transactions.firstWhereOrNull((t) => t.id == id);
+      if (tx == null) return false;
+
+      // 1. Find saving
+      final savingIdx = savings.indexWhere((s) => s.id == tx.savingId);
+      if (savingIdx != -1) {
+        final saving = savings[savingIdx];
+        // 2. Revert balance
+        final newBalance = tx.type == 'credit'
+            ? saving.balance - tx.amount
+            : saving.balance + tx.amount;
+        final updatedSaving = saving.copyWith(balance: newBalance);
+        await _db.update(_savingsTable, updatedSaving.toMap(), tx.savingId);
+        savings[savingIdx] = updatedSaving;
+      }
+
+      // 3. Delete transaction record
       await _db.delete(_txTable, id);
       transactions.removeWhere((t) => t.id == id);
       return true;

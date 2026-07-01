@@ -5,6 +5,7 @@ class TransactionModel {
   final double amount;
   final String source; // e.g. Salary, Bonus, Other
   final String? note;
+  final String paymentType;
   final String createdAt;
 
   TransactionModel({
@@ -14,6 +15,7 @@ class TransactionModel {
     required this.amount,
     required this.source,
     this.note,
+    this.paymentType = 'Cash',
     required this.createdAt,
   });
 
@@ -25,6 +27,7 @@ class TransactionModel {
       'amount': amount,
       'source': source,
       'note': note,
+      'payment_type': paymentType,
       'created_at': createdAt,
     };
   }
@@ -37,6 +40,7 @@ class TransactionModel {
       amount: (map['amount'] as num).toDouble(),
       source: map['source'] as String,
       note: map['note'] as String?,
+      paymentType: map['payment_type'] as String? ?? 'Cash',
       createdAt: map['created_at'] as String,
     );
   }
@@ -48,6 +52,7 @@ class TransactionModel {
     double? amount,
     String? source,
     String? note,
+    String? paymentType,
     String? createdAt,
   }) {
     return TransactionModel(
@@ -57,6 +62,7 @@ class TransactionModel {
       amount: amount ?? this.amount,
       source: source ?? this.source,
       note: note ?? this.note,
+      paymentType: paymentType ?? this.paymentType,
       createdAt: createdAt ?? this.createdAt,
     );
   }

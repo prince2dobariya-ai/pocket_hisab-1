@@ -189,58 +189,109 @@ class RecentTransactions extends StatelessWidget {
   }
 
   Widget _buildMergedItem(BuildContext context, _MergedTransaction item) {
-    return Container(
-      margin: .only(bottom: 12),
-      padding: .all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? AppColors.darkCard
-            : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: .all(10),
-            decoration: BoxDecoration(
-              color: item.color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+    return InkWell(
+      onLongPress: () {
+        _showDeleteDialog(item);
+      },
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? AppColors.darkCard
+              : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-            child: Icon(item.icon, color: item.color, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: .start,
-              children: [
-                Text(
-                  item.title,
-                  style: const TextStyle(fontWeight: .bold, fontSize: 15),
-                ),
-                if (item.subtitle != null && item.subtitle!.isNotEmpty)
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: item.color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(item.icon, color: item.color, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    item.subtitle!,
-                    maxLines: 1,
-                    overflow: .ellipsis,
-                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    item.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
-              ],
+                  if (item.subtitle != null && item.subtitle!.isNotEmpty)
+                    Text(
+                      item.subtitle!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                ],
+              ),
             ),
+            Text(
+              "${item.isCredit ? '+' : '-'} ${CurrencyHelper.format(item.amount)}",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: item.isCredit ? Colors.green : Colors.redAccent,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteDialog(_MergedTransaction item) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Delete Transaction"),
+        content: const Text("Are you sure you want to delete this transaction?"),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text("Cancel"),
           ),
-          Text(
-            "${item.isCredit ? '+' : '-'} ${CurrencyHelper.format(item.amount)}",
-            style: TextStyle(
-              fontWeight: .bold,
-              fontSize: 16,
-              color: item.isCredit ? Colors.green : Colors.redAccent,
-            ),
+          TextButton(
+            onPressed: () async {
+              Get.back();
+              bool success = false;
+              final idParts = item.id.split('_');
+              if (idParts.length < 2) return;
+
+              final prefix = idParts[0];
+              final realId = int.tryParse(idParts[1]);
+              if (realId == null) return;
+
+              if (prefix == 'exp') {
+                success = await Get.find<TransactionController>()
+                    .deleteExpense(realId);
+              } else if (prefix == 'tx') {
+                success = await Get.find<WalletController>()
+                    .deleteTransaction(realId);
+              } else if (prefix == 'sav') {
+                success = await Get.find<SavingController>()
+                    .deleteTransaction(realId);
+              }
+
+              if (success) {
+                Get.snackbar("Success", "Transaction deleted");
+              } else {
+                Get.snackbar("Error", "Failed to delete transaction");
+              }
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

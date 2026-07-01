@@ -42,6 +42,9 @@ class DashboardController extends GetxController {
 
   double get totalSavings => _savingCtrl.totalSavings;
 
+  int get paidEmisCount => _emiCtrl.paidEmisCount;
+  int get totalActiveEmisCount => _emiCtrl.totalActiveEmisCount;
+
   double get salaryLeft =>
       latestSalary -
       _walletCtrl.totalAddedFromSalary -

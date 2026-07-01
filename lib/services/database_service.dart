@@ -19,7 +19,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -29,6 +29,14 @@ class DatabaseService {
           await db.execute(
             'ALTER TABLE emis ADD COLUMN due_day_of_month INTEGER NOT NULL DEFAULT 1',
           );
+        }
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE emis ADD COLUMN last_paid_at TEXT');
+        }
+        if (oldVersion < 4) {
+          await db.execute('ALTER TABLE expenses ADD COLUMN payment_type TEXT DEFAULT "Cash"');
+          await db.execute('ALTER TABLE wallet_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"');
+          await db.execute('ALTER TABLE hisab_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"');
         }
       },
     );
@@ -44,7 +52,8 @@ class DatabaseService {
         note TEXT,
         date TEXT NOT NULL,
         created_at TEXT NOT NULL,
-        payment_method TEXT NOT NULL DEFAULT 'Wallet'
+        payment_method TEXT NOT NULL DEFAULT 'Wallet',
+        payment_type TEXT NOT NULL DEFAULT 'Cash'
       )
     ''');
 
@@ -67,6 +76,7 @@ class DatabaseService {
         amount REAL NOT NULL,
         source TEXT NOT NULL,
         note TEXT,
+        payment_type TEXT NOT NULL DEFAULT 'Cash',
         created_at TEXT NOT NULL,
         FOREIGN KEY (wallet_id) REFERENCES wallets (id) ON DELETE CASCADE
       )
@@ -96,6 +106,7 @@ class DatabaseService {
         end_date TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'active',
         due_day_of_month INTEGER NOT NULL DEFAULT 1,
+        last_paid_at TEXT,
         created_at TEXT NOT NULL
       )
     ''');
@@ -112,6 +123,7 @@ class DatabaseService {
         status TEXT NOT NULL DEFAULT 'pending',
         is_old INTEGER NOT NULL DEFAULT 0,
         note TEXT,
+        payment_type TEXT NOT NULL DEFAULT 'Cash',
         created_at TEXT NOT NULL,
         FOREIGN KEY (person_id) REFERENCES persons(id)
       )
@@ -198,6 +210,15 @@ class DatabaseService {
   Future<int> delete(String table, int id) async {
     final db = await database;
     return db.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteWhere(
+    String table,
+    String where,
+    List<dynamic> whereArgs,
+  ) async {
+    final db = await database;
+    return db.delete(table, where: where, whereArgs: whereArgs);
   }
 
   Future<List<Map<String, dynamic>>> rawQuery(

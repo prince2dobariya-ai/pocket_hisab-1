@@ -9,6 +9,7 @@ class EmiModel {
   final String endDate;
   final String status; // 'active' | 'completed'
   final String createdAt;
+  final String? lastPaidAt;
   final int dueDayOfMonth; // e.g. 10 or 22 — the day each instalment is due
 
   EmiModel({
@@ -22,6 +23,7 @@ class EmiModel {
     required this.endDate,
     required this.status,
     required this.createdAt,
+    this.lastPaidAt,
     this.dueDayOfMonth = 1,
   });
 
@@ -60,6 +62,7 @@ class EmiModel {
       'end_date': endDate,
       'status': status,
       'created_at': createdAt,
+      'last_paid_at': lastPaidAt,
       'due_day_of_month': dueDayOfMonth,
     };
   }
@@ -76,6 +79,7 @@ class EmiModel {
       endDate: map['end_date'] as String,
       status: map['status'] as String,
       createdAt: map['created_at'] as String,
+      lastPaidAt: map['last_paid_at'] as String?,
       dueDayOfMonth: (map['due_day_of_month'] as int?) ?? 1,
     );
   }
@@ -91,6 +95,7 @@ class EmiModel {
     String? endDate,
     String? status,
     String? createdAt,
+    String? lastPaidAt,
     int? dueDayOfMonth,
   }) {
     return EmiModel(
@@ -104,6 +109,7 @@ class EmiModel {
       endDate: endDate ?? this.endDate,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
+      lastPaidAt: lastPaidAt ?? this.lastPaidAt,
       dueDayOfMonth: dueDayOfMonth ?? this.dueDayOfMonth,
     );
   }

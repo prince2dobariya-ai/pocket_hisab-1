@@ -73,6 +73,8 @@ class WalletController extends GetxController {
     required double amount,
     required String source,
     String? note,
+    String paymentType = 'Cash',
+    String? createdAt,
   }) async {
     return _applyTransaction(
       walletId: walletId,
@@ -80,6 +82,8 @@ class WalletController extends GetxController {
       source: source,
       type: 'credit',
       note: note,
+      paymentType: paymentType,
+      createdAt: createdAt,
     );
   }
 
@@ -89,6 +93,8 @@ class WalletController extends GetxController {
     required double amount,
     required String source,
     String? note,
+    String paymentType = 'Cash',
+    String? createdAt,
   }) async {
     return _applyTransaction(
       walletId: walletId,
@@ -96,6 +102,8 @@ class WalletController extends GetxController {
       source: source,
       type: 'debit',
       note: note,
+      paymentType: paymentType,
+      createdAt: createdAt,
     );
   }
 
@@ -105,9 +113,11 @@ class WalletController extends GetxController {
     required String source,
     required String type,
     String? note,
+    required String paymentType,
+    String? createdAt,
   }) async {
     try {
-      final now = DateTime.now().toIso8601String();
+      final now = createdAt ?? DateTime.now().toIso8601String();
 
       // 1. Find wallet
       final walletIdx = wallets.indexWhere((w) => w.id == walletId);
@@ -170,6 +180,7 @@ class WalletController extends GetxController {
         amount: amount,
         source: source,
         note: note,
+        paymentType: paymentType,
         createdAt: now,
       );
       final txId = await _db.insert(_txTable, tx.toMap());
@@ -183,6 +194,23 @@ class WalletController extends GetxController {
 
   Future<bool> deleteTransaction(int id) async {
     try {
+      final tx = transactions.firstWhereOrNull((t) => t.id == id);
+      if (tx == null) return false;
+
+      // 1. Find wallet
+      final walletIdx = wallets.indexWhere((w) => w.id == tx.walletId);
+      if (walletIdx != -1) {
+        final wallet = wallets[walletIdx];
+        // 2. Revert balance
+        final newBalance = tx.type == 'credit'
+            ? wallet.balance - tx.amount
+            : wallet.balance + tx.amount;
+        final updatedWallet = wallet.copyWith(balance: newBalance);
+        await _db.update(_walletsTable, updatedWallet.toMap(), tx.walletId);
+        wallets[walletIdx] = updatedWallet;
+      }
+
+      // 3. Delete transaction record
       await _db.delete(_txTable, id);
       transactions.removeWhere((t) => t.id == id);
       return true;

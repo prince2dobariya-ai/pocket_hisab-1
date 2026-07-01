@@ -60,5 +60,22 @@ class PersonController extends GetxController {
     }
   }
 
+  Future<bool> deletePerson(int id) async {
+    try {
+      // First delete associated transactions
+      await _db.deleteWhere('hisab_transactions', 'person_id = ?', [id]);
+      // Then delete person
+      await _db.delete(_table, id);
+      
+      await fetchAll();
+      if (Get.isRegistered<HisabController>()) {
+        Get.find<HisabController>().fetchPersons();
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
 
 }

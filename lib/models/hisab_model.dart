@@ -9,6 +9,7 @@ class HisabModel {
   final String status; // 'pending' | 'settled'
   final bool isOld;
   final String? note;
+  final String paymentType;
   final String createdAt;
 
   HisabModel({
@@ -22,6 +23,7 @@ class HisabModel {
     required this.status,
     this.isOld = false,
     this.note,
+    this.paymentType = 'Cash',
     required this.createdAt,
   });
 
@@ -36,6 +38,7 @@ class HisabModel {
       'status': status,
       'is_old': isOld ? 1 : 0,
       'note': note,
+      'payment_type': paymentType,
       'created_at': createdAt,
     };
   }
@@ -52,6 +55,7 @@ class HisabModel {
       status: map['status'] as String,
       isOld: map['is_old'] == 1,
       note: map['note'] as String?,
+      paymentType: map['payment_type'] as String? ?? 'Cash',
       createdAt: map['created_at'] as String,
     );
   }
@@ -67,6 +71,7 @@ class HisabModel {
     String? status,
     bool? isOld,
     String? note,
+    String? paymentType,
     String? createdAt,
   }) {
     return HisabModel(
@@ -80,6 +85,7 @@ class HisabModel {
       status: status ?? this.status,
       isOld: isOld ?? this.isOld,
       note: note ?? this.note,
+      paymentType: paymentType ?? this.paymentType,
       createdAt: createdAt ?? this.createdAt,
     );
   }

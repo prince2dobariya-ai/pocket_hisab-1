@@ -141,6 +141,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
   final _sourceController = TextEditingController(text: "Salary");
   final walletCtrl = Get.find<WalletController>();
   String? _selectedPerson;
+  String _paymentType = 'Cash'; // Cash or UPI
 
   @override
   void dispose() {
@@ -268,6 +269,53 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
             }),
           ],
 
+          const SizedBox(height: 16),
+          const Text(
+            "Payment Type",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: ['Cash', 'UPI'].map((type) {
+              final isSelected = _paymentType == type;
+              return Expanded(
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      _paymentType = type;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primary
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      type,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black87,
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
           const SizedBox(height: 24),
           CustomButton(
             title: "Add Money",
@@ -304,6 +352,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
                     ? 'From Friend: $_selectedPerson'
                     : _sourceController.text,
                 note: "Added from ${_sourceController.text}",
+                paymentType: _paymentType,
               );
 
               // 2. Record in Hisab if it's from a friend (Borrowing)
@@ -322,6 +371,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
                     remainingAmount: amount,
                     status: 'pending',
                     note: "Received from friend",
+                    paymentType: _paymentType,
                     createdAt: DateTime.now().toIso8601String(),
                   ),
                 );

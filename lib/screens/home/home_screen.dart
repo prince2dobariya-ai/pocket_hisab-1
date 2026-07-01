@@ -649,7 +649,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     title: "Monthly EMIs",
                                     value: CurrencyHelper.format(emiMonthly),
                                     subtitle:
-                                        "Left: ${CurrencyHelper.format(emiOutstanding)}",
+                                        "Paid: ${emiCtrl.paidEmisCount}/${emiCtrl.totalActiveEmisCount}",
                                     progress: emiPercent,
                                     icon: Icons.credit_card_rounded,
                                     accentColor: Colors.blue,
@@ -676,9 +676,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-
-                    // 5. Recent Transactions
-                    const RecentTransactions(),
                   ],
                 );
               }),

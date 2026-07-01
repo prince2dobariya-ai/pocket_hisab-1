@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
+import 'package:pocket_hisab/controllers/settings_controller.dart';
 import 'package:pocket_hisab/models/expense_model.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
 import 'package:pocket_hisab/services/database_service.dart';
@@ -57,7 +58,7 @@ class EmiController extends GetxController {
   }
 
   /// Mark one month's instalment as paid.
-  Future<bool> payInstalment(int emiId) async {
+  Future<bool> payInstalment(int emiId, {String paymentMethod = 'Salary'}) async {
     final idx = emis.indexWhere((e) => e.id == emiId);
     if (idx == -1) return false;
     final emi = emis[idx];
@@ -70,6 +71,7 @@ class EmiController extends GetxController {
       paidAmount: newPaid.clamp(0, emi.totalAmount),
       remainingAmount: newRemaining.clamp(0, emi.totalAmount),
       status: newStatus,
+      lastPaidAt: DateTime.now().toIso8601String(),
     );
     final success = await updateEmi(updated);
     if (success) {
@@ -82,7 +84,7 @@ class EmiController extends GetxController {
             note: 'EMI Payment: ${emi.name}',
             date: DateFormat('d/M/yyyy').format(DateTime.now()),
             createdAt: DateTime.now().toIso8601String(),
-            paymentMethod: 'Salary',
+            paymentMethod: paymentMethod,
           ),
         );
       } catch (e) {
@@ -108,4 +110,40 @@ class EmiController extends GetxController {
 
   double get totalAmount =>
       activeEmis.fold(0.0, (sum, e) => sum + e.totalAmount);
+
+  // ── Cycle Tracking ──────────────────────────────────────────────────────
+
+  bool isPaidInCurrentCycle(EmiModel emi) {
+    if (emi.lastPaidAt == null) return false;
+
+    final lastPaid = DateTime.parse(emi.lastPaidAt!);
+    final now = DateTime.now();
+
+    // Get cycle start day from settings
+    int startDay = 1;
+    try {
+      final settings = Get.find<SettingsController>();
+      startDay = settings.cycleStartDay.value;
+    } catch (_) {}
+
+    DateTime cycleStart;
+    if (now.day >= startDay) {
+      cycleStart = DateTime(now.year, now.month, startDay);
+    } else {
+      int prevMonth = now.month - 1;
+      int prevYear = now.year;
+      if (prevMonth < 1) {
+        prevMonth = 12;
+        prevYear--;
+      }
+      cycleStart = DateTime(prevYear, prevMonth, startDay);
+    }
+
+    return lastPaid.isAfter(cycleStart) || lastPaid.isAtSameMomentAs(cycleStart);
+  }
+
+  int get paidEmisCount =>
+      activeEmis.where((e) => isPaidInCurrentCycle(e)).length;
+
+  int get totalActiveEmisCount => activeEmis.length;
 }

@@ -87,7 +87,7 @@ class _HomeMainState extends State<HomeMain>
               onPressed: () {
                 Get.to(() => AllTransactionsScreen());
               },
-              icon: Icon(Icons.history_outlined),
+              icon: Icon(Icons.receipt_long_outlined),
             ),
             IconButton(
               onPressed: () {

@@ -2,7 +2,7 @@ name: pocket_hisab
 description: "Khissu - Pocket Hisab"
 publish_to: 'none'
 
-version: 26.6.6+4
+version: 26.6.29+7
 
 environment:
   sdk: ^3.10.4

@@ -12,6 +12,7 @@ import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class AddExpenseScreen extends StatefulWidget {
@@ -30,26 +31,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   String _selectedCategory = 'Food';
   String _selectedPaymentMethod = 'Wallet';
+  String _paymentType = 'Cash'; // Cash or UPI
   String? _selectedPerson;
   DateTime _selectedDateTime = DateTime.now();
   bool _isOldMoney = false;
 
   final List<_CategoryItem> _categories = [
     _CategoryItem(name: 'Food', icon: Icons.restaurant, color: Colors.orange),
-    _CategoryItem(
-      name: 'Transport',
-      icon: Icons.directions_bus,
-      color: Colors.blue,
-    ),
+    // _CategoryItem(name: 'Transport',icon: Icons.directions_bus,color: Colors.blue),
     _CategoryItem(name: 'Rent', icon: Icons.home, color: Colors.purple),
-    _CategoryItem(name: 'Friend', icon: Icons.person, color: Colors.indigo),
+    _CategoryItem(name: 'Bills', icon: Icons.receipt, color: Colors.cyan),
+    // _CategoryItem(name: 'Friend', icon: Icons.person, color: Colors.indigo),
     _CategoryItem(
       name: 'Shopping',
       icon: Icons.shopping_bag,
       color: Colors.pink,
     ),
     _CategoryItem(name: 'Entertainment', icon: Icons.movie, color: Colors.red),
-    _CategoryItem(name: 'Bills', icon: Icons.receipt, color: Colors.cyan),
     _CategoryItem(
       name: 'Medical',
       icon: Icons.medical_services,
@@ -80,11 +78,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   }
 
   Future<void> _selectDate(BuildContext context) async {
+    // pick only current months date
+    final DateTime now = DateTime.now();
+    final DateTime firstDateOfMonth = DateTime(now.year, now.month, 1);
+    final DateTime lastDateOfMonth = DateTime(now.year, now.month + 1, 0);
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _selectedDateTime,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      firstDate: firstDateOfMonth,
+      lastDate: lastDateOfMonth,
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
         return Theme(
@@ -136,14 +139,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: const .symmetric(horizontal: 16.0, vertical: 16.0),
           child: Column(
             spacing: 24,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: .start,
             children: [
               // 1. Calculator-Style Hero Amount Card
               Container(
-                width: double.infinity,
+                width: .infinity,
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
@@ -151,8 +154,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     colors: isDark
                         ? [AppColors.darkCard, Colors.grey.shade900]
                         : [Colors.white, Colors.grey.shade50],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: .topLeft,
+                    end: .bottomRight,
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -163,7 +166,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       offset: const Offset(0, 8),
                     ),
                   ],
-                  border: Border.all(
+                  border: .all(
                     color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
                     width: 1,
                   ),
@@ -173,16 +176,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     Text(
                       "Enter Amount".toUpperCase(),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 12,
                         letterSpacing: 1.5,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: .bold,
                         color: Colors.grey.shade500,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
+                      crossAxisAlignment: .center,
+                      mainAxisAlignment: .center,
                       children: [
                         Text(
                           CurrencyHelper.format(
@@ -190,21 +193,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           )[0], // Get local currency symbol
                           style: TextStyle(
                             fontSize: 32,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: .bold,
                             color: isDark ? Colors.white70 : Colors.black54,
                           ),
                         ),
                         const SizedBox(width: 8),
                         IntrinsicWidth(
                           child: TextField(
+                            onTapOutside: (event) =>
+                                FocusScope.of(context).unfocus(),
                             controller: _amountController,
-                            keyboardType: const TextInputType.numberWithOptions(
+                            keyboardType: const .numberWithOptions(
                               decimal: true,
                             ),
-                            textAlign: TextAlign.center,
+                            textAlign: .center,
                             style: TextStyle(
                               fontSize: 40,
-                              fontWeight: FontWeight.w900,
+                              fontWeight: .w900,
                               color: isDark ? Colors.white : AppColors.primary,
                             ),
                             decoration: InputDecoration(
@@ -214,11 +219,11 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     ? Colors.grey.shade800
                                     : Colors.grey.shade300,
                               ),
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
+                              border: .none,
+                              enabledBorder: .none,
+                              focusedBorder: .none,
                               filled: false,
-                              contentPadding: EdgeInsets.zero,
+                              contentPadding: .zero,
                             ),
                           ),
                         ),
@@ -230,85 +235,77 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
               // 2. Circular Category Scroll
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 spacing: 12,
                 children: [
-                  const Text(
-                    "Select Category",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    height: 96,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: _categories.length,
-                      itemBuilder: (context, index) {
-                        final cat = _categories[index];
-                        final isSelected = _selectedCategory == cat.name;
-                        return GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedCategory = cat.name;
-                            });
-                          },
-                          child: Container(
-                            width: 76,
-                            margin: const EdgeInsets.only(right: 12),
-                            child: Column(
-                              spacing: 8,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: isSelected
-                                        ? cat.color
-                                        : cat.color.withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: cat.color.withValues(
-                                                alpha: 0.4,
-                                              ),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: Icon(
-                                    cat.icon,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : cat.color,
-                                    size: 24,
-                                  ),
-                                ),
-                                Text(
-                                  cat.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.w500,
-                                    color: isSelected
-                                        ? (isDark
-                                              ? Colors.white
-                                              : Colors.black87)
-                                        : Colors.grey.shade500,
-                                  ),
-                                ),
-                              ],
-                            ),
+                  AppText("Select Category", fontWeight: .bold),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 12,
+                    children: _categories.map((cat) {
+                      final isSelected = _selectedCategory == cat.name;
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedCategory = cat.name;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const .symmetric(
+                            horizontal: 12,
+                            vertical: 8,
                           ),
-                        );
-                      },
-                    ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? cat.color
+                                : (isDark ? AppColors.darkCard : Colors.white),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected
+                                  ? cat.color
+                                  : (isDark
+                                        ? Colors.grey.shade800
+                                        : Colors.grey.shade300),
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: cat.color.withValues(alpha: 0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                cat.icon,
+                                size: 16,
+                                color: isSelected ? Colors.white : cat.color,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                cat.name,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isDark
+                                            ? Colors.white70
+                                            : Colors.black87),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ],
               ),
@@ -450,12 +447,12 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                     Text(
                                       friend.personName,
                                       maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      overflow: .ellipsis,
                                       style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: isFriendSelected
-                                            ? FontWeight.bold
-                                            : FontWeight.w500,
+                                            ? .bold
+                                            : .w500,
                                         color: isFriendSelected
                                             ? (isDark
                                                   ? Colors.white
@@ -499,24 +496,18 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
               // 4. Date Picker Row Card
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 spacing: 12,
                 children: [
-                  const Text(
-                    "Date",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  AppText("Select Date", fontWeight: .bold),
                   InkWell(
                     onTap: () => _selectDate(context),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: .circular(16),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 16,
-                      ),
+                      padding: const .symmetric(horizontal: 16, vertical: 16),
                       decoration: BoxDecoration(
                         color: isDark ? AppColors.darkCard : Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: .circular(16),
                         border: Border.all(
                           color: isDark
                               ? Colors.grey.shade800
@@ -533,28 +524,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           ),
                           const SizedBox(width: 12),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              spacing: 2,
-                              children: [
-                                Text(
-                                  "Selected Date",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                ),
-                                Text(
-                                  todayFormatted,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.bold,
-                                    color: isDark
-                                        ? Colors.white
-                                        : Colors.black87,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              todayFormatted,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: .bold,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
                             ),
                           ),
                           Icon(
@@ -571,13 +547,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
               // 5. Payment Methods Selectable Cards
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 spacing: 12,
                 children: [
-                  const Text(
-                    "Payment Method",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  AppText("Payment Method", fontWeight: .bold),
                   Obx(() {
                     final walletBal = walletCtrl.totalBalance;
                     final salaryLeft = dashCtrl.salaryLeft;
@@ -704,22 +677,77 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       }).toList(),
                     );
                   }),
+
+                  // Conditional Cash / UPI selection if Wallet is selected
+                  if (_selectedPaymentMethod == 'Wallet') ...[
+                    const SizedBox(height: 16),
+                    AppText(
+                      "Payment Type",
+                      fontWeight: FontWeight.bold,
+                      size: 15,
+                    ),
+                    Row(
+                      children: ['Cash', 'UPI'].map((type) {
+                        final isSelected = _paymentType == type;
+                        return Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              setState(() {
+                                _paymentType = type;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : (isDark
+                                          ? AppColors.darkCard
+                                          : Colors.grey.shade100),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : (isDark
+                                            ? Colors.grey.shade800
+                                            : Colors.grey.shade300),
+                                ),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                type,
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isDark
+                                            ? Colors.white70
+                                            : Colors.black87),
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ],
               ),
 
               // 6. Note (Optional)
               Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: .start,
                 spacing: 12,
                 children: [
-                  const Text(
-                    "Note (Optional)",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                  AppText("Note (Optional)", fontWeight: .bold),
                   CustomTextField(
                     labelText: 'Add a note (e.g. dinner with team)...',
                     controller: _noteController,
-                    minLine: 3,
+                    minLine: 1,
                     maxLine: 3,
                   ),
                 ],
@@ -755,6 +783,17 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         return;
                       }
 
+                      // Determine the exact timestamp (preserve time if today, else use current time for that date)
+                      final now = DateTime.now();
+                      final resolvedDateTime = DateTime(
+                        _selectedDateTime.year,
+                        _selectedDateTime.month,
+                        _selectedDateTime.day,
+                        now.hour,
+                        now.minute,
+                        now.second,
+                      ).toIso8601String();
+
                       // 1. Save expense to database
                       await txCtrl.addExpense(
                         ExpenseModel(
@@ -762,8 +801,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           amount: amount,
                           note: _noteController.text.trim(),
                           date: _dateController.text,
-                          createdAt: DateTime.now().toIso8601String(),
+                          createdAt: resolvedDateTime,
                           paymentMethod: _selectedPaymentMethod,
+                          paymentType: _paymentType,
                         ),
                       );
 
@@ -783,7 +823,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             status: 'pending',
                             isOld: _isOldMoney,
                             note: _noteController.text.trim(),
-                            createdAt: DateTime.now().toIso8601String(),
+                            paymentType: _paymentType,
+                            createdAt: resolvedDateTime,
                           ),
                         );
                       }
@@ -801,6 +842,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             note: _noteController.text.trim().isNotEmpty
                                 ? _noteController.text.trim()
                                 : 'Paid via Wallet',
+                            paymentType: _paymentType,
+                            createdAt: resolvedDateTime,
                           );
                         } else {
                           Get.snackbar(

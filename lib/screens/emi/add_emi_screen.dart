@@ -33,22 +33,16 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
     super.dispose();
   }
 
-  void _calculateMonthly() {
-    final total = double.tryParse(_totalController.text) ?? 0;
-    final tenure = int.tryParse(_tenureController.text) ?? 0;
-    if (total > 0 && tenure > 0) {
-      setState(() {
-        _monthlyController.text = (total / tenure).toStringAsFixed(2);
-      });
-    }
-  }
-
-  void _calculateTenure() {
-    final total = double.tryParse(_totalController.text) ?? 0;
+  void _calculateTotal() {
     final monthly = double.tryParse(_monthlyController.text) ?? 0;
-    if (total > 0 && monthly > 0) {
+    final tenure = int.tryParse(_tenureController.text) ?? 0;
+    if (monthly > 0 && tenure > 0) {
       setState(() {
-        _tenureController.text = (total / monthly).ceil().toString();
+        _totalController.text = (monthly * tenure).toStringAsFixed(2);
+      });
+    } else {
+      setState(() {
+        _totalController.text = "";
       });
     }
   }
@@ -73,14 +67,6 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
               hintText: "e.g. iPhone 15 Pro",
             ),
             const SizedBox(height: 16),
-            CustomTextField(
-              controller: _totalController,
-              keyboardType: TextInputType.number,
-              labelText: "Total Amount",
-              hintText: "0.00",
-              onChange: (_) => _calculateMonthly(),
-            ),
-            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -89,7 +75,7 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                     keyboardType: TextInputType.number,
                     labelText: "Monthly EMI",
                     hintText: "0.00",
-                    onChange: (_) => _calculateTenure(),
+                    onChange: (_) => _calculateTotal(),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -99,13 +85,20 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                     keyboardType: TextInputType.number,
                     labelText: "Tenure (Months)",
                     hintText: "12",
-                    onChange: (_) => _calculateMonthly(),
+                    onChange: (_) => _calculateTotal(),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
+            CustomTextField(
+              controller: _totalController,
+              keyboardType: TextInputType.number,
+              labelText: "Total Amount",
+              hintText: "0.00",
+              readOnly: true,
+            ),
+            const SizedBox(height: 16),
             // Already Paid Amount
             CustomTextField(
               controller: _alreadyPaidController,

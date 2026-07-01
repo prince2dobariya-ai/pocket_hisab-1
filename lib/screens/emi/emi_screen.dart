@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
+import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
 import 'package:pocket_hisab/screens/emi/add_emi_screen.dart';
@@ -167,6 +168,8 @@ class _EmiCard extends StatelessWidget {
         ? (emi.paidAmount / emi.totalAmount)
         : 0.0;
     final isCompleted = emi.status == 'completed';
+    final emiCtrl = Get.find<EmiController>();
+    final isPaidThisMonth = emiCtrl.isPaidInCurrentCycle(emi);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -201,6 +204,27 @@ class _EmiCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    if (isPaidThisMonth && !isCompleted)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: Colors.green.shade200),
+                        ),
+                        child: Text(
+                          "PAID THIS CYCLE",
+                          style: TextStyle(
+                            color: Colors.green.shade700,
+                            fontSize: 8,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
@@ -291,10 +315,28 @@ class _EmiCard extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: () => _showPayConfirmation(context),
-                  icon: const Icon(Icons.check_circle_outline, size: 18),
-                  label: const Text('Pay Monthly Instalment'),
+                  onPressed: isPaidThisMonth
+                      ? () => _showAlreadyPaidWarning(context)
+                      : () => _showPayConfirmation(context),
+                  icon: Icon(
+                    isPaidThisMonth
+                        ? Icons.check_circle
+                        : Icons.check_circle_outline,
+                    size: 18,
+                    color: isPaidThisMonth ? Colors.green : null,
+                  ),
+                  label: Text(
+                    isPaidThisMonth
+                        ? 'Paid for this Cycle'
+                        : 'Pay Monthly Instalment',
+                    style: TextStyle(
+                      color: isPaidThisMonth ? Colors.green : null,
+                    ),
+                  ),
                   style: OutlinedButton.styleFrom(
+                    side: isPaidThisMonth
+                        ? const BorderSide(color: Colors.green)
+                        : null,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -304,6 +346,27 @@ class _EmiCard extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+
+  void _showAlreadyPaidWarning(BuildContext context) {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Already Paid'),
+        content: Text(
+          'You have already marked an instalment as paid for "${emi.name}" in this cycle. Do you want to pay another one?',
+        ),
+        actions: [
+          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              Get.back();
+              _showPayConfirmation(context);
+            },
+            child: const Text('Pay Again'),
+          ),
+        ],
       ),
     );
   }
@@ -341,29 +404,122 @@ class _EmiCard extends StatelessWidget {
   }
 
   void _showPayConfirmation(BuildContext context) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Confirm Payment'),
-        content: Text(
-          'Are you sure you want to mark ${CurrencyHelper.format(emi.monthlyAmount)} as paid for ${emi.name}?',
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await Get.find<EmiController>().payInstalment(
-                emi.id!,
-              );
-              Get.back();
-              if (success) {
-                Get.snackbar('Success', 'Instalment paid successfully');
-              } else {
-                Get.snackbar('Error', 'Failed to update payment');
-              }
-            },
-            child: const Text('Confirm'),
-          ),
-        ],
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Confirm Payment',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'How did you pay ${CurrencyHelper.format(emi.monthlyAmount)} for ${emi.name}?',
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: _PaymentMethodOption(
+                    icon: Icons.payments_outlined,
+                    label: 'Salary',
+                    color: Colors.blue,
+                    onTap: () => _processPayment('Salary'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _PaymentMethodOption(
+                    icon: Icons.account_balance_wallet_outlined,
+                    label: 'Wallet',
+                    color: Colors.orange,
+                    onTap: () => _processPayment('Wallet'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _processPayment(String method) async {
+    final emiCtrl = Get.find<EmiController>();
+
+    // If paying via wallet, we need to debit the first wallet (matching AddExpense logic)
+    if (method == 'Wallet') {
+      final walletCtrl = Get.find<WalletController>();
+      if (walletCtrl.wallets.isNotEmpty) {
+        final walletId = walletCtrl.wallets.first.id!;
+        await walletCtrl.debit(
+          walletId: walletId,
+          amount: emi.monthlyAmount,
+          source: 'EMI: ${emi.name}',
+          note: 'Monthly instalment paid',
+        );
+      }
+    }
+
+    final success = await emiCtrl.payInstalment(emi.id!, paymentMethod: method);
+    Get.back(); // close bottom sheet
+
+    if (success) {
+      Get.snackbar(
+        'Success',
+        'Instalment marked as paid via $method',
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
+        colorText: Colors.green.shade900,
+      );
+    } else {
+      Get.snackbar('Error', 'Failed to update payment');
+    }
+  }
+}
+
+class _PaymentMethodOption extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _PaymentMethodOption({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
       ),
     );
   }

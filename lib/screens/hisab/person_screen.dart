@@ -396,126 +396,151 @@ class _PersonScreenState extends State<PersonScreen> {
                       left: BorderSide(color: accentColor, width: 5),
                     ),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    onTap: () async {
-                      await Get.to(
-                        () => PersonHisabHistoryScreen(
-                          personId: person.id?.toString() ?? '',
-                          personName: person.personName,
-                        ),
-                      );
-                      personController.fetchAll();
-                    },
-                    leading: Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            accentColor.withValues(alpha: 0.8),
-                            accentColor.withValues(alpha: 0.5),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      child: Center(
-                        child: Text(
-                          person.personName.substring(0, 1).toUpperCase(),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                      onTap: () async {
+                        await Get.to(
+                          () => PersonHisabHistoryScreen(
+                            personId: person.id?.toString() ?? '',
+                            personName: person.personName,
+                          ),
+                        );
+                        personController.fetchAll();
+                      },
+                      onLongPress: () {
+                        Get.defaultDialog(
+                          title: "Delete Person",
+                          middleText:
+                              "Are you sure you want to delete ${person.personName} and all related transactions?",
+                          textConfirm: "Delete",
+                          textCancel: "Cancel",
+                          confirmTextColor: Colors.white,
+                          buttonColor: Colors.red,
+                          onConfirm: () async {
+                            Get.back();
+                            if (person.id != null) {
+                              await personController.deletePerson(person.id!);
+                              Get.snackbar(
+                                'Success',
+                                '${person.personName} deleted successfully',
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            }
+                          },
+                        );
+                      },
+                      leading: Container(
+                        width: 44,
+                        height: 44,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              accentColor.withValues(alpha: 0.8),
+                              accentColor.withValues(alpha: 0.5),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            person.personName.substring(0, 1).toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    title: AppText(
-                      person.personName,
-                      fontWeight: FontWeight.w600,
-                      size: 15,
-                    ),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: AppText(
-                        "Added on ${DateFormat('dd MMM, yyyy').format(DateTime.parse(person.createdAt))}",
-                        size: 11,
-                        color: AppColors.textLight,
+                      title: AppText(
+                        person.personName,
+                        fontWeight: FontWeight.w600,
+                        size: 15,
                       ),
-                    ),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (balance != 0) ...[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              AppText(
-                                CurrencyHelper.format(balance.abs()),
-                                color: balanceColor,
-                                fontWeight: FontWeight.bold,
-                                size: 14,
-                              ),
-                              const SizedBox(height: 2),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: AppText(
+                          "Added on ${DateFormat('dd MMM, yyyy').format(DateTime.parse(person.createdAt))}",
+                          size: 11,
+                          color: AppColors.textLight,
+                        ),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (balance != 0) ...[
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                AppText(
+                                  CurrencyHelper.format(balance.abs()),
+                                  color: balanceColor,
+                                  fontWeight: FontWeight.bold,
+                                  size: 14,
                                 ),
-                                decoration: BoxDecoration(
-                                  color: badgeBgColor,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  labelText,
-                                  style: TextStyle(
-                                    color: balanceColor,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 10,
+                                const SizedBox(height: 2),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: badgeBgColor,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    labelText,
+                                    style: TextStyle(
+                                      color: balanceColor,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 10,
+                                    ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ] else ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
                               ),
-                            ],
-                          ),
-                        ] else ...[
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              "SETTLED",
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 10,
-                                letterSpacing: 0.5,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                "SETTLED",
+                                style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
+                          ],
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: Colors.grey.shade400,
+                            size: 20,
                           ),
                         ],
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: Colors.grey.shade400,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
+                      ),
+                    ), // ListTile
+                  ), // Material
+                ), // Container
+              ), // ClipRRect
+            ); // Container
           },
         ),
       );
