@@ -5,6 +5,7 @@ import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
+import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/screens/emi/add_emi_screen.dart';
 
 class EmiScreen extends StatelessWidget {
@@ -460,6 +461,15 @@ class _EmiCard extends StatelessWidget {
     if (method == 'Wallet') {
       final walletCtrl = Get.find<WalletController>();
       if (walletCtrl.wallets.isNotEmpty) {
+        final available = walletCtrl.getBalanceByPaymentType('Cash');
+        if (emi.monthlyAmount > available) {
+          Get.snackbar(
+            'Error',
+            'Insufficient Wallet (Cash) balance (${CurrencyHelper.format(available)})',
+          );
+          return;
+        }
+
         final walletId = walletCtrl.wallets.first.id!;
         await walletCtrl.debit(
           walletId: walletId,
@@ -467,6 +477,16 @@ class _EmiCard extends StatelessWidget {
           source: 'EMI: ${emi.name}',
           note: 'Monthly instalment paid',
         );
+      }
+    } else if (method == 'Salary') {
+      final dashCtrl = Get.find<DashboardController>();
+      final available = dashCtrl.salaryLeft;
+      if (emi.monthlyAmount > available) {
+        Get.snackbar(
+          'Error',
+          'Insufficient Salary balance (${CurrencyHelper.format(available)})',
+        );
+        return;
       }
     }
 

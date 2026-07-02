@@ -25,41 +25,6 @@ class WalletScreen extends StatelessWidget {
           // ── Hero Balance Card ─────────────────────────────────────
           const WalletCard(),
 
-          // ── Income / Expense Summary Row ──────────────────────────
-          Obx(() {
-            final credits = walletCtrl.transactions
-                .where((t) => t.type == 'credit')
-                .fold(0.0, (s, t) => s + t.amount);
-            final debits = walletCtrl.transactions
-                .where((t) => t.type == 'debit')
-                .fold(0.0, (s, t) => s + t.amount);
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _SummaryChip(
-                      label: 'Total Income',
-                      amount: credits,
-                      icon: Icons.arrow_circle_down_rounded,
-                      color: const Color(0xFF10B981),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _SummaryChip(
-                      label: 'Total Spent',
-                      amount: debits,
-                      icon: Icons.arrow_circle_up_rounded,
-                      color: const Color(0xFFEF4444),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }),
-
           // ── Transactions Header ───────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -160,67 +125,6 @@ class WalletScreen extends StatelessWidget {
             size: 13,
             color: AppColors.textLight,
             textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Summary chip ──────────────────────────────────────────────────────────────
-
-class _SummaryChip extends StatelessWidget {
-  final String label;
-  final double amount;
-  final IconData icon;
-  final Color color;
-
-  const _SummaryChip({
-    required this.label,
-    required this.amount,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(label, size: 11, color: AppColors.textLight),
-                AppText(
-                  CurrencyHelper.format(amount),
-                  size: 14,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ],
-            ),
           ),
         ],
       ),
@@ -414,14 +318,36 @@ class _TransactionCard extends StatelessWidget {
           leading: Container(
             width: 44,
             height: 44,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: bgColor, shape: .circle),
             child: Icon(icon, color: color, size: 22),
           ),
-          title: AppText(tx.source, size: 14, fontWeight: FontWeight.w600),
+          title: AppText(tx.source, size: 14, fontWeight: .w600),
           subtitle: Padding(
-            padding: const EdgeInsets.only(top: 2),
+            padding: const .only(top: 2),
             child: Row(
               children: [
+                if (tx.paymentType != null) ...[
+                  Container(
+                    padding: const .symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: tx.paymentType == 'UPI'
+                          ? Colors.blue.withValues(alpha: 0.1)
+                          : Colors.green.withValues(alpha: 0.1),
+                      borderRadius: .circular(4),
+                    ),
+                    child: Text(
+                      tx.paymentType,
+                      style: TextStyle(
+                        color: tx.paymentType == 'UPI'
+                            ? Colors.blue
+                            : Colors.green,
+                        fontSize: 10,
+                        fontWeight: .bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                ],
                 Icon(
                   Icons.access_time_rounded,
                   size: 11,

@@ -4,6 +4,7 @@ import 'package:pocket_hisab/controllers/saving_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/wallet_model.dart';
 import 'package:pocket_hisab/models/transaction_model.dart';
+import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/services/database_service.dart';
 
 class WalletController extends GetxController {
@@ -125,15 +126,8 @@ class WalletController extends GetxController {
       final wallet = wallets[walletIdx];
 
       if (type == 'credit' && source == 'Salary') {
-        final salaryCtrl = Get.find<SalaryController>();
-        final savingCtrl = Get.find<SavingController>();
-
-        final addedToSavings = savingCtrl.totalAddedFromSalary;
-
-        final available =
-            salaryCtrl.totalSalaryReceived -
-            totalAddedFromSalary -
-            addedToSavings;
+        final dashCtrl = Get.find<DashboardController>();
+        final available = dashCtrl.salaryLeft;
 
         if (amount > available) {
           Get.snackbar(
@@ -163,6 +157,17 @@ class WalletController extends GetxController {
           source: 'Transfer to Wallet',
           note: 'Transferred to wallet',
         );
+      }
+
+      if (type == 'debit') {
+        final available = getBalanceByPaymentType(paymentType);
+        if (amount > available) {
+          Get.snackbar(
+            'Error',
+            'Insufficient $paymentType balance (${CurrencyHelper.format(available)})',
+          );
+          return false;
+        }
       }
 
       // 2. Update balance
@@ -226,6 +231,12 @@ class WalletController extends GetxController {
   double get totalAddedFromSalary => transactions
       .where((t) => t.type == 'credit' && t.source == 'Salary')
       .fold(0.0, (sum, t) => sum + t.amount);
+
+  double getBalanceByPaymentType(String paymentType) {
+    return transactions
+        .where((t) => t.paymentType == paymentType)
+        .fold(0.0, (s, t) => s + (t.type == 'credit' ? t.amount : -t.amount));
+  }
 
   List<TransactionModel> transactionsForWallet(int walletId) =>
       transactions.where((t) => t.walletId == walletId).toList();

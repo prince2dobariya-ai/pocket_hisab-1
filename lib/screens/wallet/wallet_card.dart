@@ -10,6 +10,7 @@ import 'package:pocket_hisab/controllers/person_controller.dart';
 import 'package:pocket_hisab/controllers/hisab_controller.dart';
 import 'package:pocket_hisab/models/hisab_model.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class WalletCard extends StatelessWidget {
@@ -39,27 +40,25 @@ class WalletCard extends StatelessWidget {
           .toStringAsFixed(0);
 
       return Container(
-        padding: .all(16.0),
-        margin: .symmetric(horizontal: 16),
+        margin: const .symmetric(horizontal: 16, vertical: 8),
+        padding: const .all(16),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF0F766E), const Color(0xFF115E59)]
-                : [AppColors.primary, AppColors.secondary],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+          gradient: const LinearGradient(
+            colors: [Color(0xFF10B981), Color(0xFF059669)],
+            begin: .topLeft,
+            end: .bottomRight,
           ),
-          borderRadius: .circular(12),
-          border: .all(color: Colors.blueGrey.shade50, width: 0.6),
+          borderRadius: .circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(4),
-              blurRadius: 8,
-              offset: Offset(0, 2),
+              color: const Color(0xFF059669).withValues(alpha: 0.25),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
         child: Column(
+          spacing: 4,
           children: [
             Row(
               mainAxisAlignment: .spaceBetween,
@@ -124,6 +123,77 @@ class WalletCard extends StatelessWidget {
                 ),
               ],
             ),
+            // ── Cash / UPI Summary Row ──────────────────────────
+            Obx(() {
+              final cash = walletCtrl.transactions
+                  .where((t) => t.paymentType == 'Cash')
+                  .fold(
+                    0.0,
+                    (s, t) => s + (t.type == 'credit' ? t.amount : -t.amount),
+                  );
+              final upi = walletCtrl.transactions
+                  .where((t) => t.paymentType == 'UPI')
+                  .fold(
+                    0.0,
+                    (s, t) => s + (t.type == 'credit' ? t.amount : -t.amount),
+                  );
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: _SummaryChip(
+                      label: 'Cash',
+                      amount: cash,
+                      icon: Icons.wallet,
+                      color: AppColors.background,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SummaryChip(
+                      label: 'Online',
+                      amount: upi,
+                      icon: Icons.mobile_friendly,
+                      color: AppColors.background,
+                    ),
+                  ),
+                ],
+              );
+            }),
+            // ── Income / Expense Summary Row ──────────────────────────
+            if (false)
+              Obx(() {
+                final credits = walletCtrl.transactions
+                    .where((t) => t.type == 'credit')
+                    .fold(0.0, (s, t) => s + t.amount);
+                final debits = walletCtrl.transactions
+                    .where((t) => t.type == 'debit')
+                    .fold(0.0, (s, t) => s + t.amount);
+
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _SummaryChip(
+                        label: 'Total Income',
+                        amount: credits,
+                        icon: Icons.arrow_circle_down_rounded,
+                        color: AppColors.background,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _SummaryChip(
+                        label: 'Total Spent',
+                        amount: debits,
+                        icon: Icons.arrow_circle_up_rounded,
+                        color: AppColors.background,
+                      ),
+                    ),
+                  ],
+                );
+              }),
+
+            // ── Income / Expense Summary Row ─────────────────────────          ],
           ],
         ),
       );
@@ -166,10 +236,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Add to Wallet",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+              AppText("Add to Wallet", fontWeight: .bold, size: 18),
               IconButton(
                 onPressed: () => Get.back(),
                 icon: const Icon(Icons.close),
@@ -184,10 +251,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
             hintText: "Enter amount",
           ),
           const SizedBox(height: 16),
-          const Text(
-            "Source",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+          AppText("Source", fontWeight: .w600),
           const SizedBox(height: 8),
           Builder(
             builder: (context) {
@@ -227,10 +291,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
           ),
           if (_sourceController.text == 'Friend') ...[
             const SizedBox(height: 16),
-            const Text(
-              "Select Friend",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
+            AppText("Select Friend", fontWeight: .w600),
             const SizedBox(height: 8),
             Obx(() {
               final personCtrl = Get.find<PersonController>();
@@ -270,10 +331,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
           ],
 
           const SizedBox(height: 16),
-          const Text(
-            "Payment Type",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
+          AppText("Wallet Type", fontWeight: .w600),
           const SizedBox(height: 8),
           Row(
             children: ['Cash', 'UPI'].map((type) {
@@ -345,7 +403,7 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
               final targetWalletId = walletCtrl.wallets.first.id!;
 
               // 1. Credit to wallet
-              await walletCtrl.credit(
+              final success = await walletCtrl.credit(
                 walletId: targetWalletId,
                 amount: amount,
                 source: _sourceController.text == 'Friend'
@@ -354,6 +412,10 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
                 note: "Added from ${_sourceController.text}",
                 paymentType: _paymentType,
               );
+
+              if (!success) {
+                return; // Stop here if credit failed (e.g. insufficient salary/savings)
+              }
 
               // 2. Record in Hisab if it's from a friend (Borrowing)
               if (_sourceController.text == 'Friend') {
@@ -382,6 +444,65 @@ class _AddWalletBottomSheetState extends State<_AddWalletBottomSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Summary chip ──────────────────────────────────────────────────────────────
+
+class _SummaryChip extends StatelessWidget {
+  final String label;
+  final double amount;
+  final IconData icon;
+  final Color color;
+
+  const _SummaryChip({
+    required this.label,
+    required this.amount,
+    required this.icon,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 18),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: .start,
+                  children: [
+                    AppText(label, size: 11, color: AppColors.background),
+                    AppText(
+                      CurrencyHelper.format(amount),
+                      size: 14,
+                      fontWeight: .bold,
+                      color: color,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

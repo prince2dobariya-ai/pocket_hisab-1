@@ -575,6 +575,20 @@ class _AddPersonHisabBottomSheetState
               // Get or create person to get personId
               // final personId = await hisabCtrl.getOrCreatePerson(widget.personId);
 
+              // Pre-validate Wallet Balance if it's a debit (given)
+              if (!_isBorrowed && walletCtrl.wallets.isNotEmpty) {
+                final available = walletCtrl.getBalanceByPaymentType(
+                  _paymentType,
+                );
+                if (amount > available) {
+                  Get.snackbar(
+                    'Error',
+                    'Insufficient $_paymentType balance (${CurrencyHelper.format(available)})',
+                  );
+                  return;
+                }
+              }
+
               // Add Hisab
               final type = _isBorrowed ? 'borrowed' : 'given';
               await hisabCtrl.addHisab(

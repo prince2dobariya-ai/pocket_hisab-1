@@ -794,6 +794,31 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                         now.second,
                       ).toIso8601String();
 
+                      // 0. Pre-validate Wallet/Salary Balance
+                      if (_selectedPaymentMethod == 'Wallet') {
+                        if (walletCtrl.wallets.isNotEmpty) {
+                          final available = walletCtrl.getBalanceByPaymentType(
+                            _paymentType,
+                          );
+                          if (amount > available) {
+                            Get.snackbar(
+                              'Error',
+                              'Insufficient $_paymentType balance (${CurrencyHelper.format(available)})',
+                            );
+                            return;
+                          }
+                        }
+                      } else if (_selectedPaymentMethod == 'Salary') {
+                        final available = dashCtrl.salaryLeft;
+                        if (amount > available) {
+                          Get.snackbar(
+                            'Error',
+                            'Insufficient Salary balance (${CurrencyHelper.format(available)})',
+                          );
+                          return;
+                        }
+                      }
+
                       // 1. Save expense to database
                       await txCtrl.addExpense(
                         ExpenseModel(
