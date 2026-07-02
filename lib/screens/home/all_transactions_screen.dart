@@ -295,7 +295,7 @@ class AllTransactionsScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          if (item.paymentType != null) ...[
+                          if (false && item.paymentType != null) ...[
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 6,

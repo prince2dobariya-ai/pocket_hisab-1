@@ -680,7 +680,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
                   // Conditional Cash / UPI selection if Wallet is selected
                   if (_selectedPaymentMethod == 'Wallet') ...[
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 4),
                     AppText(
                       "Payment Type",
                       fontWeight: FontWeight.bold,

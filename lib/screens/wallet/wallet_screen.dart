@@ -348,20 +348,7 @@ class _TransactionCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                 ],
-                Icon(
-                  Icons.access_time_rounded,
-                  size: 11,
-                  color: Colors.grey.shade400,
-                ),
-                const SizedBox(width: 3),
-                AppText(timeStr, size: 11, color: AppColors.textLight),
                 if (tx.note != null && tx.note!.isNotEmpty) ...[
-                  const SizedBox(width: 8),
-                  const Text(
-                    '·',
-                    style: TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  const SizedBox(width: 6),
                   Flexible(
                     child: AppText(
                       tx.note!,
@@ -374,14 +361,31 @@ class _TransactionCard extends StatelessWidget {
               ],
             ),
           ),
-          trailing: Text(
-            '${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: color,
-              letterSpacing: -0.3,
-            ),
+          trailing: Column(
+            mainAxisAlignment: .spaceEvenly,
+            children: [
+              Text(
+                '${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: color,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              Row(
+                mainAxisSize: .min,
+                children: [
+                  Icon(
+                    Icons.access_time_rounded,
+                    size: 11,
+                    color: Colors.grey.shade400,
+                  ),
+                  const SizedBox(width: 3),
+                  AppText(timeStr, size: 11, color: AppColors.textLight),
+                ],
+              ),
+            ],
           ),
         ),
       ),
