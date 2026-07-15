@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
+  final String? title;
+  final Widget? titleWidget;
   final List<Widget> actions;
   final PreferredSizeWidget? bottom;
+  final bool? centerTitle;
 
   const CustomAppBar({
     super.key,
-    required this.title,
+    this.title,
+    this.titleWidget,
     this.actions = const [],
     this.bottom,
+    this.centerTitle = true,
   });
 
   @override
@@ -22,11 +28,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: Navigator.canPop(context) ? null : const AnimatedLogo(),
-      title: Text(title),
-      centerTitle: Navigator.canPop(context) ? true : false,
+      leading: centerTitle ?? false ? null : const AnimatedLogo(),
+      title: titleWidget ?? (title != null ? AppText(title!, size: 18) : null),
+      centerTitle: centerTitle ?? false,
       actions: actions,
       bottom: bottom,
+      titleSpacing: 0,
     );
   }
 }
@@ -108,7 +115,7 @@ class AnimatedLogoState extends State<AnimatedLogo>
     }
 
     if (_tapCount == 3) {
-      Get.snackbar(
+      showCustomSnackbar(
         "Oops! 💸",
         "Did you just drop a coin from your wallet?",
         snackPosition: SnackPosition.BOTTOM,
@@ -116,7 +123,7 @@ class AnimatedLogoState extends State<AnimatedLogo>
         colorText: Colors.blue.shade900,
       );
     } else if (_tapCount == 9) {
-      Get.snackbar(
+      showCustomSnackbar(
         "Hey! 🏦",
         "This is a wallet, not a toy!",
         snackPosition: SnackPosition.BOTTOM,
@@ -124,7 +131,7 @@ class AnimatedLogoState extends State<AnimatedLogo>
         colorText: Colors.orange.shade900,
       );
     } else if (_tapCount == 15) {
-      Get.snackbar(
+      showCustomSnackbar(
         "Warning! 🚨",
         "Any more taps and I'll deduct ₹10 from your balance! Just kidding! 😜",
         snackPosition: SnackPosition.BOTTOM,
@@ -132,7 +139,7 @@ class AnimatedLogoState extends State<AnimatedLogo>
         colorText: Colors.red.shade900,
       );
     } else if (_tapCount == 21) {
-      Get.snackbar(
+      showCustomSnackbar(
         "Okay, you win! 🏆",
         "You are the ultimate Pocket Hisab clicker!",
         snackPosition: SnackPosition.BOTTOM,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
@@ -286,9 +287,9 @@ class RecentTransactions extends StatelessWidget {
               }
 
               if (success) {
-                Get.snackbar("Success", "Transaction deleted");
+                showCustomSnackbar("Success", "Transaction deleted");
               } else {
-                Get.snackbar("Error", "Failed to delete transaction");
+                showCustomSnackbar("Error", "Failed to delete transaction");
               }
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red)),

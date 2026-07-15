@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -19,7 +20,7 @@ class WalletScreen extends StatelessWidget {
     final walletCtrl = Get.find<WalletController>();
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       body: Column(
         children: [
           // ── Hero Balance Card ─────────────────────────────────────
@@ -43,13 +44,13 @@ class WalletScreen extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
+                      color: context.themePrimary.withValues(alpha: 0.1),
+                      borderRadius: .circular(16),
                     ),
                     child: AppText(
                       '${walletCtrl.transactions.length} records',
                       size: 11,
-                      color: AppColors.primary,
+                      color: context.themePrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -62,7 +63,7 @@ class WalletScreen extends StatelessWidget {
           Expanded(
             child: Obx(() {
               if (walletCtrl.transactions.isEmpty) {
-                return _buildEmptyState();
+                return _buildEmptyState(context);
               }
 
               final grouped = groupBy(walletCtrl.transactions, (tx) {
@@ -89,7 +90,7 @@ class WalletScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -110,7 +111,7 @@ class WalletScreen extends StatelessWidget {
             child: Icon(
               Icons.receipt_long_rounded,
               size: 56,
-              color: AppColors.primary.withValues(alpha: 0.5),
+              color: context.themePrimary.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 20),
@@ -123,7 +124,7 @@ class WalletScreen extends StatelessWidget {
           AppText(
             'Add money to your wallet to get started.',
             size: 13,
-            color: AppColors.textLight,
+            color: context.themeTextLight,
             textAlign: TextAlign.center,
           ),
         ],
@@ -166,28 +167,28 @@ class _DateGroup extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
+                  color: context.themePrimary.withValues(alpha: 0.08),
+                  borderRadius: .circular(8),
                 ),
                 child: AppText(
                   getDateTitle(date),
                   size: 12,
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
+                  color: context.themePrimary,
+                  fontWeight: .w600,
                 ),
               ),
-              Expanded(child: Container(height: 1, color: AppColors.border)),
+              Expanded(child: Container(height: 1, color: context.themeBorder)),
               AppText(
                 '+${totalIncome == 0 ? 0 : CurrencyHelper.format(totalIncome)}',
                 size: 12,
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
+                color: AppColors.income,
+                fontWeight: .w600,
               ),
               AppText(
                 '-${CurrencyHelper.format(totalExpense > 0 ? totalExpense : 0)}',
                 size: 12,
                 color: AppColors.danger,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
               ),
             ],
           ),
@@ -209,11 +210,12 @@ class _TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isCredit = tx.type == 'credit';
-    final color = isCredit ? const Color(0xFF10B981) : const Color(0xFFEF4444);
+    final color = isCredit ? AppColors.income : AppColors.danger;
     final bgColor = isCredit
-        ? const Color(0xFF10B981).withValues(alpha: 0.08)
-        : const Color(0xFFEF4444).withValues(alpha: 0.08);
+        ? AppColors.income.withValues(alpha: 0.15)
+        : AppColors.danger.withValues(alpha: 0.15);
     final icon = isCredit
         ? Icons.arrow_circle_down_rounded
         : Icons.arrow_circle_up_rounded;
@@ -221,21 +223,26 @@ class _TransactionCard extends StatelessWidget {
     final timeStr = DateFormat('hh:mm a').format(txDate);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: const .only(left: 16, right: 16, bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: isDark ? AppColors.darkCard : Colors.white,
+        borderRadius: .circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+        border: Border.all(
+          color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+          width: 1,
+        ),
       ),
       child: Material(
         color: Colors.transparent,
-        child: ListTile(
+        child: InkWell(
+          borderRadius: .circular(16),
           onLongPress: () {
             if (tx.id != null) {
               Get.dialog(
@@ -296,9 +303,12 @@ class _TransactionCard extends StatelessWidget {
                         }
 
                         if (success) {
-                          Get.snackbar("Success", "Transaction deleted");
+                          showCustomSnackbar("Success", "Transaction deleted");
                         } else {
-                          Get.snackbar("Error", "Failed to delete transaction");
+                          showCustomSnackbar(
+                            "Error",
+                            "Failed to delete transaction",
+                          );
                         }
                       },
                       child: const Text(
@@ -311,81 +321,108 @@ class _TransactionCard extends StatelessWidget {
               );
             }
           },
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 6,
-          ),
-          leading: Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(color: bgColor, shape: .circle),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          title: AppText(tx.source, size: 14, fontWeight: .w600),
-          subtitle: Padding(
-            padding: const .only(top: 2),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                if (tx.paymentType != null) ...[
-                  Container(
-                    padding: const .symmetric(horizontal: 6, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: tx.paymentType == 'UPI'
-                          ? Colors.blue.withValues(alpha: 0.1)
-                          : Colors.green.withValues(alpha: 0.1),
-                      borderRadius: .circular(4),
-                    ),
-                    child: Text(
-                      tx.paymentType,
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: bgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tx.source,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontFamily: 'Poppins',
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          if (tx.paymentType != null) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: tx.paymentType == 'Online'
+                                    ? Colors.blue.withValues(alpha: 0.1)
+                                    : Colors.green.withValues(alpha: 0.1),
+                                borderRadius: .circular(4),
+                              ),
+                              child: Text(
+                                tx.paymentType,
+                                style: TextStyle(
+                                  color: tx.paymentType == 'Online'
+                                      ? Colors.blue
+                                      : Colors.green,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                          ],
+                          if (tx.note != null && tx.note!.isNotEmpty) ...[
+                            Flexible(
+                              child: Text(
+                                tx.note!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade500,
+                                  fontFamily: 'Poppins',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      "${isCredit ? '+' : '-'} ${CurrencyHelper.format(tx.amount)}",
                       style: TextStyle(
-                        color: tx.paymentType == 'UPI'
-                            ? Colors.blue
-                            : Colors.green,
-                        fontSize: 10,
-                        fontWeight: .bold,
+                        fontWeight: .w800,
+                        fontSize: 16,
+                        color: color,
+                        fontFamily: 'Poppins',
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                ],
-                if (tx.note != null && tx.note!.isNotEmpty) ...[
-                  Flexible(
-                    child: AppText(
-                      tx.note!,
-                      size: 11,
-                      color: AppColors.textLight,
-                      maxLines: 1,
+                    const SizedBox(height: 4),
+                    Text(
+                      timeStr,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Poppins',
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ],
             ),
-          ),
-          trailing: Column(
-            mainAxisAlignment: .spaceEvenly,
-            children: [
-              Text(
-                '${isCredit ? '+' : '-'}${CurrencyHelper.format(tx.amount)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: color,
-                  letterSpacing: -0.3,
-                ),
-              ),
-              Row(
-                mainAxisSize: .min,
-                children: [
-                  Icon(
-                    Icons.access_time_rounded,
-                    size: 11,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(width: 3),
-                  AppText(timeStr, size: 11, color: AppColors.textLight),
-                ],
-              ),
-            ],
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/monthly_archive_model.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 
 class MonthlyArchiveScreen extends StatelessWidget {
   const MonthlyArchiveScreen({super.key});
@@ -23,29 +24,33 @@ class MonthlyArchiveScreen extends StatelessWidget {
         if (ctrl.archives.isEmpty) {
           return Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: .center,
               children: [
-                Icon(
-                  Icons.inbox_rounded,
-                  size: 72,
-                  color: Colors.grey.shade300,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No archives yet',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade500,
+                Container(
+                  padding: const .all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: .circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.archive_outlined,
+                    size: 56,
+                    color: context.themePrimary.withValues(alpha: 0.5),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 24),
+                const AppText('No Archives Found'),
+                SizedBox(height: 16),
                 Text(
                   'Completed salary cycles will appear here.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade400,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade400),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -57,8 +62,7 @@ class MonthlyArchiveScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           itemCount: ctrl.archives.length,
           separatorBuilder: (_, __) => const SizedBox(height: 12),
-          itemBuilder: (context, i) =>
-              _ArchiveTile(archive: ctrl.archives[i]),
+          itemBuilder: (context, i) => _ArchiveTile(archive: ctrl.archives[i]),
         );
       }),
     );
@@ -72,8 +76,10 @@ class _ArchiveTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final savingsRate = archive.salaryAmount > 0
-        ? (archive.totalAddedToSavings / archive.salaryAmount * 100)
-            .clamp(0.0, 100.0)
+        ? (archive.totalAddedToSavings / archive.salaryAmount * 100).clamp(
+            0.0,
+            100.0,
+          )
         : 0.0;
 
     return Card(
@@ -86,14 +92,13 @@ class _ArchiveTile extends StatelessWidget {
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
         child: ExpansionTile(
           tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          childrenPadding:
-              const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           leading: Container(
             width: 46,
             height: 46,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.secondary],
+                colors: [context.themePrimary, context.themeSecondary],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -107,10 +112,7 @@ class _ArchiveTile extends StatelessWidget {
           ),
           title: Text(
             archive.label,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
             'Salary: ${CurrencyHelper.format(archive.salaryAmount)}',
@@ -124,7 +126,7 @@ class _ArchiveTile extends StatelessWidget {
               icon: Icons.monetization_on_rounded,
               label: 'Salary',
               value: archive.salaryAmount,
-              color: AppColors.primary,
+              color: context.themePrimary,
             ),
             _Row(
               icon: Icons.receipt_long_rounded,
@@ -166,9 +168,7 @@ class _ArchiveTile extends StatelessWidget {
               child: Chip(
                 visualDensity: VisualDensity.compact,
                 avatar: Icon(
-                  archive.walletKept
-                      ? Icons.check_circle
-                      : Icons.cancel,
+                  archive.walletKept ? Icons.check_circle : Icons.cancel,
                   size: 14,
                   color: archive.walletKept ? Colors.green : Colors.red,
                 ),

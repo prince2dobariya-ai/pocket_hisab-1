@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
@@ -32,12 +33,11 @@ class _PersonScreenState extends State<PersonScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       body: RefreshIndicator(
         onRefresh: () => personController.fetchAll(),
         child: Column(
           children: [
-            const SizedBox(height: 8),
             _buildNetBalanceCard(),
             if (false) _buildSearchBar(),
             _buildFilterChips(),
@@ -49,7 +49,7 @@ class _PersonScreenState extends State<PersonScreen> {
         onPressed: () {
           Get.bottomSheet(
             _AddPersonBottomSheet(),
-            isScrollControlled: false,
+            isScrollControlled: true,
             backgroundColor: Colors.transparent,
           );
         },
@@ -64,6 +64,7 @@ class _PersonScreenState extends State<PersonScreen> {
   }
 
   Widget _buildNetBalanceCard() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Obx(() {
       double balance = personController.netBalance.value;
       String formattedBalance = CurrencyHelper.format(balance.abs());
@@ -98,16 +99,33 @@ class _PersonScreenState extends State<PersonScreen> {
         margin: const .symmetric(horizontal: 16, vertical: 8),
         padding: const .all(20),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF10B981), Color(0xFF059669)],
-            begin: .topLeft,
-            end: .bottomRight,
-          ),
           borderRadius: .circular(24),
+          gradient: LinearGradient(
+            colors: isDark
+                ? [
+                    Color.alphaBlend(
+                      context.themePrimary.withValues(alpha: 0.20),
+                      AppColors.darkCard,
+                    ),
+                    Color.alphaBlend(
+                      context.themePrimary.withValues(alpha: 0.20),
+                      AppColors.darkCard,
+                    ),
+                  ]
+                : [
+                    Color.alphaBlend(
+                      Colors.black.withValues(alpha: 0.15),
+                      context.themePrimary,
+                    ),
+                    context.themePrimary,
+                  ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF059669).withValues(alpha: 0.25),
-              blurRadius: 15,
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.25),
+              blurRadius: 16,
               offset: const Offset(0, 8),
             ),
           ],
@@ -179,16 +197,13 @@ class _PersonScreenState extends State<PersonScreen> {
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
+                  padding: const .symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: statePillColor,
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: .circular(30),
                   ),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                    mainAxisSize: .min,
                     children: [
                       Icon(stateIcon, color: stateTextColor, size: 16),
                       const SizedBox(width: 4),
@@ -197,7 +212,7 @@ class _PersonScreenState extends State<PersonScreen> {
                         style: TextStyle(
                           color: stateTextColor,
                           fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: .bold,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -214,11 +229,11 @@ class _PersonScreenState extends State<PersonScreen> {
 
   Widget _buildSearchBar() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const .symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: .circular(16),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
@@ -279,7 +294,7 @@ class _PersonScreenState extends State<PersonScreen> {
           final filter = filters[index];
           final isSelected = _selectedFilter == filter;
 
-          Color activeBgColor = AppColors.primary;
+          Color activeBgColor = context.themePrimary;
           Color activeTextColor = Colors.white;
           Color inactiveBgColor = Colors.white;
           Color inactiveTextColor = Colors.grey.shade600;
@@ -306,7 +321,7 @@ class _PersonScreenState extends State<PersonScreen> {
               selectedColor: activeBgColor,
               backgroundColor: inactiveBgColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: .circular(12),
                 side: BorderSide(
                   color: isSelected ? Colors.transparent : Colors.grey.shade200,
                   width: 1,
@@ -353,43 +368,58 @@ class _PersonScreenState extends State<PersonScreen> {
             PersonModel person = filteredPersons[index];
             final balance = person.balance ?? 0.0;
 
-            Color accentColor;
-            Color balanceColor;
-            Color badgeBgColor;
-            String labelText;
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final Color accentColor;
+            final Color balanceColor;
+            final Color badgeBgColor;
+            final String labelText;
 
             if (balance > 0) {
               accentColor = Colors.green;
-              balanceColor = Colors.green.shade700;
-              badgeBgColor = Colors.green.shade50;
+              balanceColor = isDark
+                  ? Colors.green.shade400
+                  : Colors.green.shade700;
+              badgeBgColor = isDark
+                  ? Colors.green.withValues(alpha: 0.15)
+                  : Colors.green.shade50;
               labelText = "YOU GET";
             } else if (balance < 0) {
               accentColor = Colors.red;
-              balanceColor = Colors.red.shade700;
-              badgeBgColor = Colors.red.shade50;
+              balanceColor = isDark ? Colors.red.shade400 : Colors.red.shade700;
+              badgeBgColor = isDark
+                  ? Colors.red.withValues(alpha: 0.15)
+                  : Colors.red.shade50;
               labelText = "YOU PAY";
             } else {
               accentColor = Colors.grey;
-              balanceColor = Colors.grey.shade600;
-              badgeBgColor = Colors.grey.shade100;
+              balanceColor = isDark
+                  ? Colors.grey.shade400
+                  : Colors.grey.shade600;
+              badgeBgColor = isDark
+                  ? Colors.grey.withValues(alpha: 0.15)
+                  : Colors.grey.shade100;
               labelText = "SETTLED";
             }
 
             return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              margin: const .symmetric(horizontal: 16, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                color: isDark ? AppColors.darkCard : Colors.white,
+                borderRadius: .circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.02),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
                 ],
+                border: .all(
+                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                  width: 1,
+                ),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: .circular(16),
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border(
@@ -399,7 +429,7 @@ class _PersonScreenState extends State<PersonScreen> {
                   child: Material(
                     color: Colors.transparent,
                     child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: const .symmetric(
                         horizontal: 16,
                         vertical: 8,
                       ),
@@ -415,6 +445,15 @@ class _PersonScreenState extends State<PersonScreen> {
                       onLongPress: () {
                         Get.defaultDialog(
                           title: "Delete Person",
+                          titleStyle: TextStyle(
+                            color: isDark ? Colors.white : Colors.black,
+                          ),
+                          middleTextStyle: TextStyle(
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
+                          backgroundColor: isDark
+                              ? AppColors.bottomSheetDark
+                              : AppColors.bottomSheet,
                           middleText:
                               "Are you sure you want to delete ${person.personName} and all related transactions?",
                           textConfirm: "Delete",
@@ -425,7 +464,7 @@ class _PersonScreenState extends State<PersonScreen> {
                             Get.back();
                             if (person.id != null) {
                               await personController.deletePerson(person.id!);
-                              Get.snackbar(
+                              showCustomSnackbar(
                                 'Success',
                                 '${person.personName} deleted successfully',
                                 snackPosition: SnackPosition.BOTTOM,
@@ -469,7 +508,7 @@ class _PersonScreenState extends State<PersonScreen> {
                         child: AppText(
                           "Added on ${DateFormat('dd MMM, yyyy').format(DateTime.parse(person.createdAt))}",
                           size: 11,
-                          color: AppColors.textLight,
+                          color: context.themeTextLight,
                         ),
                       ),
                       trailing: Row(
@@ -488,13 +527,13 @@ class _PersonScreenState extends State<PersonScreen> {
                                 ),
                                 const SizedBox(height: 2),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: const .symmetric(
                                     horizontal: 6,
                                     vertical: 2,
                                   ),
                                   decoration: BoxDecoration(
                                     color: badgeBgColor,
-                                    borderRadius: BorderRadius.circular(6),
+                                    borderRadius: .circular(6),
                                   ),
                                   child: Text(
                                     labelText,
@@ -514,13 +553,13 @@ class _PersonScreenState extends State<PersonScreen> {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(6),
+                                color: badgeBgColor,
+                                borderRadius: .circular(6),
                               ),
                               child: Text(
                                 "SETTLED",
                                 style: TextStyle(
-                                  color: Colors.grey.shade500,
+                                  color: balanceColor,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 10,
                                   letterSpacing: 0.5,
@@ -572,7 +611,7 @@ class _PersonScreenState extends State<PersonScreen> {
                 child: Icon(
                   Icons.people_outline_rounded,
                   size: 64,
-                  color: AppColors.primary.withValues(alpha: 0.6),
+                  color: context.themePrimary.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 24),
@@ -588,8 +627,9 @@ class _PersonScreenState extends State<PersonScreen> {
                     ? "Try adjusting your search query to find this person."
                     : "Add people you lend money to or borrow money from to start tracking your hisabs.",
                 size: 13,
-                color: AppColors.textLight,
+                color: context.themeTextLight,
                 textAlign: TextAlign.center,
+                maxLines: 2,
               ),
               const SizedBox(height: 32),
             ],
@@ -616,29 +656,43 @@ class _AddPersonBottomSheetState extends State<_AddPersonBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: .vertical(top: .circular(28)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.bottomSheetDark : AppColors.bottomSheet,
+        borderRadius: const .vertical(top: Radius.circular(28)),
       ),
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 16,
+        top: 8,
         bottom: MediaQuery.of(context).padding.bottom + 20.0,
       ),
       child: Column(
         mainAxisSize: .min,
         crossAxisAlignment: .start,
         children: [
+          Center(
+            child: Container(
+              margin: const .only(bottom: 12),
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[700] : Colors.grey[300],
+                borderRadius: .circular(99),
+              ),
+            ),
+          ),
           Row(
             mainAxisAlignment: .spaceBetween,
             children: [
               const AppText("Add New Person", fontWeight: .bold, size: 18),
               IconButton(
                 style: IconButton.styleFrom(
-                  backgroundColor: Colors.grey.shade100,
-                  padding: const EdgeInsets.all(4),
+                  backgroundColor: isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey.shade100,
+                  padding: const .all(4),
                 ),
                 onPressed: () => Get.back(),
                 icon: const Icon(Icons.close_rounded, size: 20),
@@ -661,7 +715,7 @@ class _AddPersonBottomSheetState extends State<_AddPersonBottomSheet> {
               onTap: () {
                 final personName = _personName.text.trim();
                 if (personName.isEmpty) {
-                  Get.snackbar('Error', 'Please enter Person name');
+                  showCustomSnackbar('Error', 'Please enter Person name');
                   return;
                 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/controllers/person_controller.dart';
@@ -8,6 +9,7 @@ import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/controllers/settings_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class SavingCard extends StatelessWidget {
@@ -67,16 +69,11 @@ class SavingCard extends StatelessWidget {
                       foregroundColor: Colors.green,
                     ),
                     onPressed: () {
-                      Get.bottomSheet(
-                        const AddSavingBottomSheet(),
-                        isScrollControlled: true,
-                        backgroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(20),
-                          ),
-                        ),
-                      );
+                    Get.bottomSheet(
+                      const AddSavingBottomSheet(),
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                    );
                     },
                     icon: Icon(Icons.add, color: Colors.green, size: 24),
                     label: Text("Add to Saving"),
@@ -134,149 +131,173 @@ class AddSavingBottomSheetState extends State<AddSavingBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.bottomSheetDark : AppColors.bottomSheet,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 24.0,
+        top: 8.0,
         bottom: MediaQuery.of(context).padding.bottom + 16.0,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Add to Saving",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(99),
+                ),
               ),
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          CustomTextField(
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            labelText: "Amount",
-            hintText: "Enter amount",
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "Source",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Builder(
-            builder: (context) {
-              final sources = ['Salary', 'Wallet', 'Friend', 'Other'];
-              return Wrap(
-                spacing: 12,
-                children: sources.map((source) {
-                  final isSelected = _sourceController.text == source;
-                  return InkWell(
-                    onTap: () {
-                      setState(() {
-                        _sourceController.text = source;
-                      });
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const .symmetric(horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primary
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        source,
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: isSelected ? .bold : .normal,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              );
-            },
-          ),
-          if (_sourceController.text == 'Friend') ...[
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const AppText(
+                  "Add to Saving",
+                  fontWeight: FontWeight.bold,
+                  size: 20,
+                ),
+                IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                    padding: const EdgeInsets.all(4),
+                  ),
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
-            const Text(
-              "Select Friend",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            CustomTextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              labelText: "Amount",
+              hintText: "Enter amount",
+            ),
+            const SizedBox(height: 16),
+            const AppText(
+              "Source",
+              fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 8),
-            Obx(() {
-              final personCtrl = Get.find<PersonController>();
-              if (personCtrl.persons.isEmpty) {
-                return Text(
-                  "No friends found. Add them in the Hisab section first.",
-                  style: TextStyle(color: Colors.red.shade400, fontSize: 12),
-                );
-              }
-              return DropdownButtonFormField<String>(
-                initialValue: _selectedPerson,
-                hint: const Text("Select friend"),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  prefixIcon: const Icon(Icons.person_outline),
-                ),
-                items: personCtrl.persons
-                    .map(
-                      (p) => DropdownMenuItem(
-                        value: p.personName,
-                        child: Text(p.personName),
+            Builder(
+              builder: (context) {
+                final sources = ['Salary', 'Wallet', 'Friend', 'Other'];
+                return Wrap(
+                  spacing: 12,
+                  children: sources.map((source) {
+                    final isSelected = _sourceController.text == source;
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _sourceController.text = source;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? context.themePrimary
+                              : isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          source,
+                          style: TextStyle(
+                            color: isSelected
+                                ? Colors.white
+                                : isDark ? Colors.white70 : Colors.black87,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
                       ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedPerson = value;
-                  });
-                },
-              );
-            }),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+            if (_sourceController.text == 'Friend') ...[
+              const SizedBox(height: 16),
+              const AppText(
+                "Select Friend",
+                fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 8),
+              Obx(() {
+                final personCtrl = Get.find<PersonController>();
+                if (personCtrl.persons.isEmpty) {
+                  return Text(
+                    "No friends found. Add them in the Hisab section first.",
+                    style: TextStyle(color: Colors.red.shade400, fontSize: 12),
+                  );
+                }
+                return DropdownButtonFormField<String>(
+                  initialValue: _selectedPerson,
+                  hint: const Text("Select friend"),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    prefixIcon: const Icon(Icons.person_outline),
+                  ),
+                  items: personCtrl.persons
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p.personName,
+                          child: Text(p.personName),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedPerson = value;
+                    });
+                  },
+                );
+              }),
+            ],
+            const SizedBox(height: 24),
+            CustomButton(
+              title: "Add Money",
+              onTap: () async {
+                final amountText = _amountController.text.trim();
+                if (amountText.isEmpty) {
+                  showCustomSnackbar('Error', 'Please enter amount');
+                  return;
+                }
+                final amount = double.tryParse(amountText);
+                if (amount == null || amount <= 0) {
+                  showCustomSnackbar('Error', 'Invalid amount entered');
+                  return;
+                }
+                final success = await savingsCtrl.addToSaving(
+                  amount: amount,
+                  source: _sourceController.text,
+                  selectedPerson: _selectedPerson,
+                );
+
+                if (success) {
+                  Get.back();
+                }
+              },
+            ),
           ],
-
-          const SizedBox(height: 24),
-          CustomButton(
-            title: "Add Money",
-            onTap: () async {
-              final amountText = _amountController.text.trim();
-              if (amountText.isEmpty) {
-                Get.snackbar('Error', 'Please enter amount');
-                return;
-              }
-              final amount = double.tryParse(amountText);
-              if (amount == null || amount <= 0) {
-                Get.snackbar('Error', 'Invalid amount entered');
-                return;
-              }
-              final success = await savingsCtrl.addToSaving(
-                amount: amount,
-                source: _sourceController.text,
-                selectedPerson: _selectedPerson,
-              );
-
-              if (success) {
-                Get.back();
-              }
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

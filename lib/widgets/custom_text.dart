@@ -26,13 +26,11 @@ class AppText extends StatelessWidget {
       text,
       maxLines: maxLines,
       textAlign: textAlign,
-
-      overflow: TextOverflow.ellipsis,
-
+      overflow: .ellipsis,
       style: TextStyle(
         fontSize: size ?? 16,
-        fontWeight: fontWeight ?? FontWeight.w500,
-        color: color ?? AppColors.textDark,
+        fontWeight: fontWeight ?? .bold,
+        color: color ?? context.themeTextDark,
         fontFamily: 'Poppins',
       ),
     );
@@ -51,8 +49,8 @@ class HeadingText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: color ?? AppColors.textDark,
+        fontWeight: .bold,
+        color: color ?? context.themeTextDark,
         fontFamily: 'Poppins',
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/saving_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
@@ -96,6 +97,7 @@ class WalletController extends GetxController {
     String? note,
     String paymentType = 'Cash',
     String? createdAt,
+    bool checkBalance = true,
   }) async {
     return _applyTransaction(
       walletId: walletId,
@@ -105,6 +107,7 @@ class WalletController extends GetxController {
       note: note,
       paymentType: paymentType,
       createdAt: createdAt,
+      checkBalance: checkBalance,
     );
   }
 
@@ -116,6 +119,7 @@ class WalletController extends GetxController {
     String? note,
     required String paymentType,
     String? createdAt,
+    bool checkBalance = true,
   }) async {
     try {
       final now = createdAt ?? DateTime.now().toIso8601String();
@@ -130,7 +134,7 @@ class WalletController extends GetxController {
         final available = dashCtrl.salaryLeft;
 
         if (amount > available) {
-          Get.snackbar(
+          showCustomSnackbar(
             'Error',
             'Amount exceeds available salary (${CurrencyHelper.format(available)})',
           );
@@ -141,13 +145,13 @@ class WalletController extends GetxController {
       if (type == 'credit' && source == 'Saving') {
         final savingCtrl = Get.find<SavingController>();
         if (savingCtrl.savings.isEmpty) {
-          Get.snackbar('Error', 'No savings account found to transfer from');
+          showCustomSnackbar('Error', 'No savings account found to transfer from');
           return false;
         }
 
         final mainSaving = savingCtrl.savings.first;
         if (mainSaving.balance < amount) {
-          Get.snackbar('Error', 'Insufficient balance in savings');
+          showCustomSnackbar('Error', 'Insufficient balance in savings');
           return false;
         }
 
@@ -159,10 +163,10 @@ class WalletController extends GetxController {
         );
       }
 
-      if (type == 'debit') {
+      if (type == 'debit' && checkBalance) {
         final available = getBalanceByPaymentType(paymentType);
         if (amount > available) {
-          Get.snackbar(
+          showCustomSnackbar(
             'Error',
             'Insufficient $paymentType balance (${CurrencyHelper.format(available)})',
           );

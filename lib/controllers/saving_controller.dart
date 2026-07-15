@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -176,12 +177,12 @@ class SavingController extends GetxController {
     String? selectedPerson,
   }) async {
     if (savings.isEmpty) {
-      Get.snackbar('Error', 'No savings account found');
+      showCustomSnackbar('Error', 'No savings account found');
       return false;
     }
 
     if (source == 'Friend' && selectedPerson == null) {
-      Get.snackbar('Error', 'Please select a friend');
+      showCustomSnackbar('Error', 'Please select a friend');
       return false;
     }
 
@@ -189,7 +190,7 @@ class SavingController extends GetxController {
       final dashCtrl = Get.find<DashboardController>();
       final available = dashCtrl.salaryLeft;
       if (available < amount) {
-        Get.snackbar(
+        showCustomSnackbar(
           'Error',
           'Insufficient balance in salary (${CurrencyHelper.format(available)})',
         );
@@ -201,12 +202,12 @@ class SavingController extends GetxController {
     if (source == 'Wallet') {
       final walletCtrl = Get.find<WalletController>();
       if (walletCtrl.wallets.isEmpty) {
-        Get.snackbar('Error', 'No wallet found to transfer from');
+        showCustomSnackbar('Error', 'No wallet found to transfer from');
         return false;
       }
       final mainWallet = walletCtrl.wallets.first;
       if (mainWallet.balance < amount) {
-        Get.snackbar('Error', 'Insufficient balance in wallet');
+        showCustomSnackbar('Error', 'Insufficient balance in wallet');
         return false;
       }
 

@@ -14,7 +14,7 @@ class WalletCardHome extends StatelessWidget {
     final settingsCtrl = Get.find<SettingsController>();
 
     return Card(
-      color: AppColors.primary.withAlpha(25),
+      color: context.themePrimary.withAlpha(25),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -42,13 +42,13 @@ class WalletCardHome extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.account_balance_wallet_outlined,
-                            color: AppColors.primary,
+                            color: context.themePrimary,
                             size: 20,
                           ),
                           Text(
                             "Wallet Balance",
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: context.themePrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -63,15 +63,15 @@ class WalletCardHome extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const CircleAvatar(
+                  CircleAvatar(
                     backgroundColor: Colors.white,
-                    child: Icon(Icons.wallet, color: AppColors.primary),
+                    child: Icon(Icons.wallet, color: context.themePrimary),
                   ),
                 ],
               ),
               LinearProgressIndicator(
                 value: percentage,
-                color: percentage < 0.8 ? AppColors.primary : Colors.orange,
+                color: percentage < 0.8 ? context.themePrimary : Colors.orange,
                 minHeight: 12,
                 borderRadius: BorderRadius.circular(12),
               ),

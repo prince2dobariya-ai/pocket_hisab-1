@@ -14,6 +14,7 @@ class CustomTextField extends StatelessWidget {
   final void Function()? onTap;
   final IconButton? suffixIcon;
   final bool? autoFocus;
+  final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
@@ -31,13 +32,17 @@ class CustomTextField extends StatelessWidget {
     required this.controller,
     this.suffixIcon,
     this.autoFocus,
+    this.focusNode,
     this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return TextFormField(
       autofocus: autoFocus ?? false,
+      focusNode: focusNode,
       controller: controller,
       minLines: minLine,
       maxLines: maxLine,
@@ -48,38 +53,48 @@ class CustomTextField extends StatelessWidget {
         FocusScope.of(context).unfocus();
       },
       inputFormatters: inputFormatters,
-      textInputAction: TextInputAction.next,
+      textInputAction: .next,
       onTap: onTap,
+      style: TextStyle(
+        color: isDark ? Colors.white : Colors.black87,
+        fontFamily: 'Poppins',
+      ),
       decoration: InputDecoration(
         suffixIcon: suffixIcon,
         labelText: labelText,
         hintText: hintText,
-        labelStyle: const TextStyle(fontSize: 14),
-        hintStyle: TextStyle(color: Colors.grey[500]),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
+        labelStyle: TextStyle(
+          fontSize: 14,
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
         ),
+        hintStyle: TextStyle(
+          color: isDark ? Colors.grey[600] : Colors.grey[400],
+        ),
+        filled: true,
+        fillColor: isDark ? AppColors.darkCard : Colors.white,
+        contentPadding: const .symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderRadius: .circular(12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey[300]!,
+          ),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey[300]!),
+          borderRadius: .circular(12),
+          borderSide: BorderSide(
+            color: isDark ? Colors.grey.shade800 : Colors.grey[300]!,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.border, width: 2),
+          borderRadius: .circular(12),
+          borderSide: BorderSide(color: context.themePrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: .circular(12),
           borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: .circular(12),
           borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
       ),

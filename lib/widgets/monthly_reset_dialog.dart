@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -105,7 +106,10 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [AppColors.primary, AppColors.secondary],
+                            colors: [
+                              context.themePrimary,
+                              context.themeSecondary,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -169,7 +173,7 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                               icon: Icons.monetization_on_rounded,
                               label: 'Salary',
                               value: CurrencyHelper.format(lastSalary),
-                              color: AppColors.primary,
+                              color: context.themePrimary,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -207,7 +211,7 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                       _InfoRow(
                         icon: Icons.archive_rounded,
                         text: 'Previous salary is archived for history',
-                        color: AppColors.primary,
+                        color: context.themePrimary,
                       ),
                       _InfoRow(
                         icon: Icons.check_circle_rounded,
@@ -227,13 +231,13 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: _keepWallet
-                                ? AppColors.primary
+                                ? context.themePrimary
                                 : Colors.grey.shade300,
                             width: 2,
                           ),
                           borderRadius: BorderRadius.circular(16),
                           color: _keepWallet
-                              ? AppColors.primary.withValues(alpha: 0.05)
+                              ? context.themePrimary.withValues(alpha: 0.05)
                               : null,
                         ),
                         child: SwitchListTile(
@@ -262,11 +266,11 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                                 ? Icons.account_balance_wallet_rounded
                                 : Icons.account_balance_wallet_outlined,
                             color: _keepWallet
-                                ? AppColors.primary
+                                ? context.themePrimary
                                 : Colors.grey,
                           ),
                           value: _keepWallet,
-                          activeThumbColor: AppColors.primary,
+                          activeThumbColor: context.themePrimary,
                           onChanged: (v) => setState(() => _keepWallet = v),
                         ),
                       ),
@@ -283,7 +287,7 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                                     width: double.infinity,
                                     child: ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
+                                        backgroundColor: context.themePrimary,
                                         foregroundColor: Colors.white,
                                         padding: const EdgeInsets.symmetric(
                                           vertical: 16,
@@ -331,7 +335,7 @@ class _MonthlyResetDialogState extends State<MonthlyResetDialog>
                                       onPressed: () {
                                         // Snooze: remind again next launch
                                         Get.back();
-                                        Get.snackbar(
+                                        showCustomSnackbar(
                                           'Snoozed',
                                           'You can reset anytime from Settings → Monthly Reset',
                                           duration: const Duration(seconds: 3),

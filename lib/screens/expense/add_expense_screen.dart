@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -38,7 +39,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
 
   final List<_CategoryItem> _categories = [
     _CategoryItem(name: 'Food', icon: Icons.restaurant, color: Colors.orange),
-    // _CategoryItem(name: 'Transport',icon: Icons.directions_bus,color: Colors.blue),
     _CategoryItem(name: 'Rent', icon: Icons.home, color: Colors.purple),
     _CategoryItem(name: 'Bills', icon: Icons.receipt, color: Colors.cyan),
     // _CategoryItem(name: 'Friend', icon: Icons.person, color: Colors.indigo),
@@ -48,11 +48,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       color: Colors.pink,
     ),
     _CategoryItem(name: 'Entertainment', icon: Icons.movie, color: Colors.red),
-    _CategoryItem(
-      name: 'Medical',
-      icon: Icons.medical_services,
-      color: Colors.green,
-    ),
     _CategoryItem(name: 'Others', icon: Icons.category, color: Colors.blueGrey),
   ];
 
@@ -93,8 +88,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
         return Theme(
           data: isDark
               ? ThemeData.dark().copyWith(
-                  colorScheme: const ColorScheme.dark(
-                    primary: AppColors.primary,
+                  colorScheme: ColorScheme.dark(
+                    primary: context.themePrimary,
                     onPrimary: Colors.white,
                     surface: AppColors.darkCard,
                     onSurface: Colors.white,
@@ -104,8 +99,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   ),
                 )
               : ThemeData.light().copyWith(
-                  colorScheme: const ColorScheme.light(
-                    primary: AppColors.primary,
+                  colorScheme: ColorScheme.light(
+                    primary: context.themePrimary,
                     onPrimary: Colors.white,
                     surface: Colors.white,
                     onSurface: Colors.black87,
@@ -202,6 +197,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                           child: TextField(
                             onTapOutside: (event) =>
                                 FocusScope.of(context).unfocus(),
+                            autofocus: true,
                             controller: _amountController,
                             keyboardType: const .numberWithOptions(
                               decimal: true,
@@ -210,7 +206,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                             style: TextStyle(
                               fontSize: 40,
                               fontWeight: .w900,
-                              color: isDark ? Colors.white : AppColors.primary,
+                              color: isDark
+                                  ? Colors.white
+                                  : context.themePrimary,
                             ),
                             decoration: InputDecoration(
                               hintText: "0.00",
@@ -401,7 +399,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                             shape: BoxShape.circle,
                                             border: Border.all(
                                               color: isFriendSelected
-                                                  ? AppColors.primary
+                                                  ? context.themePrimary
                                                   : Colors.transparent,
                                               width: 2.5,
                                             ),
@@ -409,15 +407,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                           child: CircleAvatar(
                                             radius: 22,
                                             backgroundColor: isFriendSelected
-                                                ? AppColors.primary.withValues(
-                                                    alpha: 0.1,
-                                                  )
+                                                ? context.themePrimary
+                                                      .withValues(alpha: 0.1)
                                                 : Colors.indigo.shade50,
                                             child: Text(
                                               initial,
                                               style: TextStyle(
                                                 color: isFriendSelected
-                                                    ? AppColors.primary
+                                                    ? context.themePrimary
                                                     : Colors.indigo.shade700,
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 16,
@@ -431,8 +428,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                             right: 0,
                                             child: Container(
                                               padding: const EdgeInsets.all(2),
-                                              decoration: const BoxDecoration(
-                                                color: AppColors.primary,
+                                              decoration: BoxDecoration(
+                                                color: context.themePrimary,
                                                 shape: BoxShape.circle,
                                               ),
                                               child: const Icon(
@@ -473,7 +470,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       children: [
                         Checkbox(
                           value: _isOldMoney,
-                          activeColor: AppColors.primary,
+                          activeColor: context.themePrimary,
                           onChanged: (val) {
                             setState(() {
                               _isOldMoney = val ?? false;
@@ -517,9 +514,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.calendar_month_rounded,
-                            color: AppColors.primary,
+                            color: context.themePrimary,
                             size: 20,
                           ),
                           const SizedBox(width: 12),
@@ -579,14 +576,16 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary.withValues(alpha: 0.08)
+                                    ? context.themePrimary.withValues(
+                                        alpha: 0.08,
+                                      )
                                     : (isDark
                                           ? AppColors.darkCard
                                           : Colors.white),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
-                                      ? AppColors.primary
+                                      ? context.themePrimary
                                       : (isDark
                                             ? Colors.grey.shade800
                                             : Colors.grey.shade200),
@@ -595,9 +594,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 boxShadow: isSelected
                                     ? [
                                         BoxShadow(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.1,
-                                          ),
+                                          color: context.themePrimary
+                                              .withValues(alpha: 0.1),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
@@ -616,7 +614,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                         padding: const EdgeInsets.all(6),
                                         decoration: BoxDecoration(
                                           color: isSelected
-                                              ? AppColors.primary
+                                              ? context.themePrimary
                                               : (isDark
                                                     ? Colors.grey.shade800
                                                     : Colors.grey.shade100),
@@ -633,9 +631,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                         ),
                                       ),
                                       if (isSelected)
-                                        const Icon(
+                                        Icon(
                                           Icons.check_circle,
-                                          color: AppColors.primary,
+                                          color: context.themePrimary,
                                           size: 20,
                                         ),
                                     ],
@@ -660,7 +658,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                         style: TextStyle(
                                           fontSize: 12,
                                           color: isSelected
-                                              ? AppColors.primary
+                                              ? context.themePrimary
                                               : Colors.grey.shade500,
                                           fontWeight: isSelected
                                               ? FontWeight.bold
@@ -687,7 +685,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       size: 15,
                     ),
                     Row(
-                      children: ['Cash', 'UPI'].map((type) {
+                      children: ['Cash', 'Online'].map((type) {
                         final isSelected = _paymentType == type;
                         return Expanded(
                           child: InkWell(
@@ -702,32 +700,37 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary
+                                    ? context.themePrimary
                                     : (isDark
                                           ? AppColors.darkCard
                                           : Colors.grey.shade100),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
                                   color: isSelected
-                                      ? AppColors.primary
+                                      ? context.themePrimary
                                       : (isDark
                                             ? Colors.grey.shade800
                                             : Colors.grey.shade300),
                                 ),
                               ),
                               alignment: Alignment.center,
-                              child: Text(
-                                type,
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.white
-                                      : (isDark
-                                            ? Colors.white70
-                                            : Colors.black87),
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    type,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : (isDark
+                                                ? Colors.white70
+                                                : Colors.black87),
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
@@ -762,13 +765,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     onTap: () async {
                       final amountText = _amountController.text.trim();
                       if (amountText.isEmpty) {
-                        Get.snackbar("Error", "Please enter amount");
+                        showCustomSnackbar("Error", "Please enter amount");
                         return;
                       }
 
                       final amount = double.tryParse(amountText);
                       if (amount == null || amount <= 0) {
-                        Get.snackbar("Error", "Invalid amount entered");
+                        showCustomSnackbar("Error", "Invalid amount entered");
                         return;
                       }
 
@@ -779,7 +782,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       // Validation for Friend category
                       if (_selectedCategory == 'Friend' &&
                           _selectedPerson == null) {
-                        Get.snackbar("Error", "Please select a friend");
+                        showCustomSnackbar("Error", "Please select a friend");
                         return;
                       }
 
@@ -795,42 +798,33 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ).toIso8601String();
 
                       // 0. Pre-validate Wallet/Salary Balance
-                      if (_selectedPaymentMethod == 'Wallet') {
-                        if (walletCtrl.wallets.isNotEmpty) {
-                          final available = walletCtrl.getBalanceByPaymentType(
-                            _paymentType,
-                          );
+                      if (!_isOldMoney) {
+                        if (_selectedPaymentMethod == 'Salary') {
+                          final available = dashCtrl.salaryLeft;
                           if (amount > available) {
-                            Get.snackbar(
+                            showCustomSnackbar(
                               'Error',
-                              'Insufficient $_paymentType balance (${CurrencyHelper.format(available)})',
+                              'Insufficient Salary balance (${CurrencyHelper.format(available)})',
                             );
                             return;
                           }
                         }
-                      } else if (_selectedPaymentMethod == 'Salary') {
-                        final available = dashCtrl.salaryLeft;
-                        if (amount > available) {
-                          Get.snackbar(
-                            'Error',
-                            'Insufficient Salary balance (${CurrencyHelper.format(available)})',
-                          );
-                          return;
-                        }
                       }
 
                       // 1. Save expense to database
-                      await txCtrl.addExpense(
-                        ExpenseModel(
-                          category: _selectedCategory,
-                          amount: amount,
-                          note: _noteController.text.trim(),
-                          date: _dateController.text,
-                          createdAt: resolvedDateTime,
-                          paymentMethod: _selectedPaymentMethod,
-                          paymentType: _paymentType,
-                        ),
-                      );
+                      if (!_isOldMoney) {
+                        await txCtrl.addExpense(
+                          ExpenseModel(
+                            category: _selectedCategory,
+                            amount: amount,
+                            note: _noteController.text.trim(),
+                            date: _dateController.text,
+                            createdAt: resolvedDateTime,
+                            paymentMethod: _selectedPaymentMethod,
+                            paymentType: _paymentType,
+                          ),
+                        );
+                      }
 
                       // 2. Record in Hisab if it's a friend expense
                       if (_selectedCategory == 'Friend') {
@@ -855,7 +849,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       }
 
                       // 3. Conditional deduction from Wallet
-                      if (_selectedPaymentMethod == 'Wallet') {
+                      if (!_isOldMoney && _selectedPaymentMethod == 'Wallet') {
                         if (walletCtrl.wallets.isNotEmpty) {
                           final walletId = walletCtrl.wallets.first.id!;
                           await walletCtrl.debit(
@@ -869,9 +863,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                                 : 'Paid via Wallet',
                             paymentType: _paymentType,
                             createdAt: resolvedDateTime,
+                            checkBalance: false,
                           );
                         } else {
-                          Get.snackbar(
+                          showCustomSnackbar(
                             "Info",
                             "Expense recorded, but no wallet found to update balance.",
                           );

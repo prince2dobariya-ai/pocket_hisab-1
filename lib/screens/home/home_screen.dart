@@ -12,18 +12,24 @@ import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/settings_controller.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/helpers/currency_helper.dart';
+import 'package:pocket_hisab/screens/groups/groups_screen.dart';
 import 'package:pocket_hisab/screens/home/widgets/salary_card.dart';
 import 'package:pocket_hisab/screens/home/widgets/saving_card.dart';
-import 'package:pocket_hisab/screens/home/widgets/recent_transactions.dart';
 import 'package:pocket_hisab/screens/emi/emi_screen.dart';
 import 'package:pocket_hisab/screens/emi/add_emi_screen.dart';
 import 'package:pocket_hisab/screens/expense/add_expense_screen.dart';
 import 'package:pocket_hisab/utils/easter_egg_messages.dart';
 import 'package:pocket_hisab/widgets/custom_appbar.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.tabController});
+  const HomeScreen({
+    super.key,
+    required this.tabController,
+    required this.incomeKey,
+  });
   final TabController tabController;
+  final GlobalKey incomeKey;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -104,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
-                vertical: 16.0,
+                vertical: 8.0,
               ),
               child: Obx(() {
                 final latestSalary = salaryCtrl.latestSalary?.amount ?? 0.0;
@@ -113,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     : salaryCtrl.latestSalary!.month;
 
                 final walletAdded = walletCtrl.totalAddedFromSalary;
-                final emiPaid = emiCtrl.totalMonthlyEmi;
                 final salarySpent = transactionCtrl.totalSalaryExpenses;
                 final savingAdded = savingCtrl.totalAddedFromSalary;
 
@@ -143,7 +148,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     : 0.0;
 
                 final emiMonthly = dashCtrl.totalMonthlyEmi;
-                final emiOutstanding = emiCtrl.totalRemainingAmount;
                 final emiPaidTotal = emiCtrl.totalPaidAmount;
                 final emiTotal = emiCtrl.totalAmount;
                 final emiPercent = emiTotal > 0
@@ -161,43 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   spacing: 16,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 1. Dynamic Greeting Header
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _getGreeting(),
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              todayStr,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade500,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const .only(right: 16),
-                          child: Transform.scale(
-                            scale: 1.5,
-                            child: const AnimatedLogo(),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // 2. Hero Card (Gradient background, balance left, cycle tracker)
+                    // 1. Hero Card (Gradient background, balance left, cycle tracker)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(20),
@@ -206,16 +174,34 @@ class _HomeScreenState extends State<HomeScreen> {
                         gradient: LinearGradient(
                           colors: isDark
                               ? [
-                                  const Color(0xFF0F766E),
-                                  const Color(0xFF115E59),
+                                  Color.alphaBlend(
+                                    context.themePrimary.withValues(
+                                      alpha: 0.20,
+                                    ),
+                                    AppColors.darkCard,
+                                  ),
+                                  Color.alphaBlend(
+                                    context.themePrimary.withValues(
+                                      alpha: 0.20,
+                                    ),
+                                    AppColors.darkCard,
+                                  ),
                                 ]
-                              : [AppColors.primary, AppColors.secondary],
+                              : [
+                                  Color.alphaBlend(
+                                    Colors.black.withValues(alpha: 0.15),
+                                    context.themePrimary,
+                                  ),
+                                  context.themePrimary,
+                                ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.25),
+                            color: Theme.of(
+                              context,
+                            ).primaryColor.withValues(alpha: 0.25),
                             blurRadius: 16,
                             offset: const Offset(0, 8),
                           ),
@@ -251,49 +237,48 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ],
                               ),
-                              ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 8,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    side: BorderSide(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.3,
+                              Showcase(
+                                key: widget.incomeKey,
+                                title: "Add Income (આવક ઉમેરો)",
+                                description:
+                                    "Start by entering your monthly income to track your balance.",
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white.withValues(
+                                      alpha: 0.2,
+                                    ),
+                                    foregroundColor: Colors.white,
+                                    elevation: 0,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.3,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                onPressed: () {
-                                  Get.bottomSheet(
-                                    const AddSalaryBottomSheet(),
-                                    isScrollControlled: true,
-                                    backgroundColor: isDark
-                                        ? AppColors.darkCard
-                                        : Colors.white,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(20),
-                                      ),
+                                  onPressed: () {
+                                    Get.bottomSheet(
+                                      const AddSalaryBottomSheet(),
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    size: 16,
+                                  ),
+                                  label: const Text(
+                                    "Add Income",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  );
-                                },
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  size: 16,
-                                ),
-                                label: const Text(
-                                  "Add Income",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -381,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
 
-                    // 3. Quick Action Hub
+                    // 2. Quick Action Hub
                     if (false)
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,14 +400,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Get.bottomSheet(
                                     const AddSavingBottomSheet(),
                                     isScrollControlled: true,
-                                    backgroundColor: isDark
-                                        ? AppColors.darkCard
-                                        : Colors.white,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(20),
-                                      ),
-                                    ),
+                                    backgroundColor: Colors.transparent,
                                   );
                                 },
                               ),
@@ -437,19 +415,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 context: context,
                                 icon: Icons.account_balance_wallet_outlined,
                                 label: "Add Income",
-                                color: AppColors.primary,
+                                color: context.themePrimary,
                                 onTap: () {
                                   Get.bottomSheet(
                                     const AddSalaryBottomSheet(),
                                     isScrollControlled: true,
-                                    backgroundColor: isDark
-                                        ? AppColors.darkCard
-                                        : Colors.white,
-                                    shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(20),
-                                      ),
-                                    ),
+                                    backgroundColor: Colors.transparent,
                                   );
                                 },
                               ),
@@ -458,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
 
-                    // 3.5 Total Money Summary Card
+                    // 3 Total Money Summary Card
                     Builder(
                       builder: (context) {
                         final totalMoney = salaryLeft + walletBalance + savings;
@@ -505,7 +476,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primary.withValues(
+                                      color: context.themePrimary.withValues(
                                         alpha: 0.1,
                                       ),
                                       borderRadius: BorderRadius.circular(8),
@@ -515,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
+                                        color: context.themePrimary,
                                       ),
                                     ),
                                   ),
@@ -548,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         context: context,
                                         label: "Wallet",
                                         amount: walletBalance,
-                                        color: AppColors.primary,
+                                        color: context.themePrimary,
                                         icon: Icons
                                             .account_balance_wallet_rounded,
                                       ),
@@ -607,7 +578,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         "${(walletPercent * 100).toStringAsFixed(0)}% Limit Used",
                                     progress: walletPercent,
                                     icon: Icons.account_balance_wallet_rounded,
-                                    accentColor: AppColors.primary,
+                                    accentColor: Colors.green,
                                     onTap: () =>
                                         widget.tabController.animateTo(1),
                                   ),
@@ -626,14 +597,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Get.bottomSheet(
                                         const AddSavingBottomSheet(),
                                         isScrollControlled: true,
-                                        backgroundColor: isDark
-                                            ? AppColors.darkCard
-                                            : Colors.white,
-                                        shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.vertical(
-                                            top: Radius.circular(20),
-                                          ),
-                                        ),
+                                        backgroundColor: Colors.transparent,
                                       );
                                     },
                                   ),
@@ -671,6 +635,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                            _buildBentoCard(
+                              context: context,
+                              title: "Group Expense",
+                              value: "",
+                              subtitle: "",
+                              progress: 0,
+                              icon: Icons.groups,
+                              accentColor: Colors.purple,
+                              onTap: () => Get.to(() => const GroupsScreen()),
                             ),
                           ],
                         ),
@@ -806,6 +780,12 @@ class _HomeScreenState extends State<HomeScreen> {
               offset: const Offset(0, 4),
             ),
           ],
+          image: title.toLowerCase() == "group expense"
+              ? DecorationImage(
+                  image: AssetImage('assets/group_expense.png'),
+                  alignment: .centerEnd,
+                )
+              : null,
           border: Border.all(
             color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
             width: 1,

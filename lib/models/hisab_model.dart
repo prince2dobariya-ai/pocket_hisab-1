@@ -10,6 +10,7 @@ class HisabModel {
   final bool isOld;
   final String? note;
   final String paymentType;
+  final int? groupId;
   final String createdAt;
 
   HisabModel({
@@ -24,6 +25,7 @@ class HisabModel {
     this.isOld = false,
     this.note,
     this.paymentType = 'Cash',
+    this.groupId,
     required this.createdAt,
   });
 
@@ -39,6 +41,7 @@ class HisabModel {
       'is_old': isOld ? 1 : 0,
       'note': note,
       'payment_type': paymentType,
+      'group_id': groupId,
       'created_at': createdAt,
     };
   }
@@ -56,6 +59,7 @@ class HisabModel {
       isOld: map['is_old'] == 1,
       note: map['note'] as String?,
       paymentType: map['payment_type'] as String? ?? 'Cash',
+      groupId: map['group_id'] as int?,
       createdAt: map['created_at'] as String,
     );
   }
@@ -72,6 +76,7 @@ class HisabModel {
     bool? isOld,
     String? note,
     String? paymentType,
+    int? groupId,
     String? createdAt,
   }) {
     return HisabModel(
@@ -86,6 +91,7 @@ class HisabModel {
       isOld: isOld ?? this.isOld,
       note: note ?? this.note,
       paymentType: paymentType ?? this.paymentType,
+      groupId: groupId ?? this.groupId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

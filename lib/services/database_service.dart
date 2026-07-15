@@ -19,7 +19,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 8,
       onCreate: _onCreate,
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -34,12 +34,52 @@ class DatabaseService {
           await db.execute('ALTER TABLE emis ADD COLUMN last_paid_at TEXT');
         }
         if (oldVersion < 4) {
-          await db.execute('ALTER TABLE expenses ADD COLUMN payment_type TEXT DEFAULT "Cash"');
-          await db.execute('ALTER TABLE wallet_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"');
-          await db.execute('ALTER TABLE hisab_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"');
+          await db.execute(
+            'ALTER TABLE expenses ADD COLUMN payment_type TEXT DEFAULT "Cash"',
+          );
+          await db.execute(
+            'ALTER TABLE wallet_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"',
+          );
+          await db.execute(
+            'ALTER TABLE hisab_transactions ADD COLUMN payment_type TEXT DEFAULT "Cash"',
+          );
+        }
+        if (oldVersion < 5) {
+          await _createGroupTables(db);
+        }
+        if (oldVersion < 6) {
+          // Moved person_id column migration to version 8 to safely handle duplicate column errors.
+        }
+        if (oldVersion < 7) {
+          await db.execute(
+            'ALTER TABLE hisab_transactions ADD COLUMN group_id INTEGER DEFAULT NULL',
+          );
+        }
+        if (oldVersion < 8) {
+          await _addColumnIfNotExists(
+            db,
+            'group_members',
+            'person_id',
+            'INTEGER DEFAULT NULL',
+          );
         }
       },
     );
+  }
+
+  Future<void> _addColumnIfNotExists(
+    Database db,
+    String table,
+    String column,
+    String definition,
+  ) async {
+    final List<Map<String, dynamic>> columns = await db.rawQuery(
+      'PRAGMA table_info($table)',
+    );
+    final exists = columns.any((c) => c['name'] == column);
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -124,6 +164,7 @@ class DatabaseService {
         is_old INTEGER NOT NULL DEFAULT 0,
         note TEXT,
         payment_type TEXT NOT NULL DEFAULT 'Cash',
+        group_id INTEGER DEFAULT NULL,
         created_at TEXT NOT NULL,
         FOREIGN KEY (person_id) REFERENCES persons(id)
       )
@@ -164,6 +205,54 @@ class DatabaseService {
 
     // 10. monthly_archives
     await _createMonthlyArchivesTable(db);
+
+    // 11. Groups (Split Expenses)
+    await _createGroupTables(db);
+  }
+
+  Future<void> _createGroupTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS groups (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS group_members (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        person_id INTEGER,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS group_expenses (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        title TEXT NOT NULL,
+        total_amount REAL NOT NULL,
+        paid_by_member_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (paid_by_member_id) REFERENCES group_members(id) ON DELETE CASCADE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS group_expense_splits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_expense_id INTEGER NOT NULL,
+        member_id INTEGER NOT NULL,
+        amount_owed REAL NOT NULL,
+        FOREIGN KEY (group_expense_id) REFERENCES group_expenses(id) ON DELETE CASCADE,
+        FOREIGN KEY (member_id) REFERENCES group_members(id) ON DELETE CASCADE
+      )
+    ''');
   }
 
   Future<void> _createMonthlyArchivesTable(Database db) async {

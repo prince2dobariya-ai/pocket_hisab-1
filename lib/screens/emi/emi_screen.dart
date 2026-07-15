@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -7,6 +8,8 @@ import 'package:pocket_hisab/helpers/currency_helper.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
 import 'package:pocket_hisab/controllers/dashboard_controller.dart';
 import 'package:pocket_hisab/screens/emi/add_emi_screen.dart';
+import 'package:pocket_hisab/widgets/custom_appbar.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 
 class EmiScreen extends StatelessWidget {
   const EmiScreen({super.key});
@@ -16,8 +19,8 @@ class EmiScreen extends StatelessWidget {
     final emiCtrl = Get.find<EmiController>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My EMIs'),
+      appBar: CustomAppBar(
+        title: 'My EMIs',
         actions: [
           IconButton(
             onPressed: () => Get.to(() => const AddEmiScreen()),
@@ -33,19 +36,29 @@ class EmiScreen extends StatelessWidget {
         if (emiCtrl.emis.isEmpty) {
           return Center(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 24,
+              mainAxisAlignment: .center,
               children: [
-                Icon(
-                  Icons.receipt_long_rounded,
-                  size: 64,
-                  color: Colors.grey.shade300,
+                Container(
+                  padding: const .all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: .circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 16,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.receipt_long_rounded,
+                    size: 56,
+                    color: context.themePrimary.withValues(alpha: 0.5),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  'No EMIs added yet',
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 18),
-                ),
-                const SizedBox(height: 8),
+                const AppText('No EMIs Found'),
                 ElevatedButton(
                   onPressed: () => Get.to(() => const AddEmiScreen()),
                   child: const Text('Add Your First EMI'),
@@ -95,12 +108,15 @@ class _EmiSummaryHeader extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+          colors: [
+            context.themePrimary,
+            context.themePrimary.withValues(alpha: 0.8),
+          ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
+            color: context.themePrimary.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -234,13 +250,15 @@ class _EmiCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isCompleted
                             ? Colors.green.withValues(alpha: 0.1)
-                            : AppColors.primary.withValues(alpha: 0.1),
+                            : context.themePrimary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         emi.status.toUpperCase(),
                         style: TextStyle(
-                          color: isCompleted ? Colors.green : AppColors.primary,
+                          color: isCompleted
+                              ? Colors.green
+                              : context.themePrimary,
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
                         ),
@@ -294,7 +312,7 @@ class _EmiCard extends StatelessWidget {
                 minHeight: 8,
                 backgroundColor: Colors.grey.shade200,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  isCompleted ? Colors.green : AppColors.primary,
+                  isCompleted ? Colors.green : context.themePrimary,
                 ),
               ),
             ),
@@ -392,9 +410,9 @@ class _EmiCard extends StatelessWidget {
               );
               Get.back();
               if (success) {
-                Get.snackbar('Deleted', 'EMI deleted successfully');
+                showCustomSnackbar('Deleted', 'EMI deleted successfully');
               } else {
-                Get.snackbar('Error', 'Failed to delete EMI');
+                showCustomSnackbar('Error', 'Failed to delete EMI');
               }
             },
             child: const Text('Delete'),
@@ -405,25 +423,59 @@ class _EmiCard extends StatelessWidget {
   }
 
   void _showPayConfirmation(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Get.bottomSheet(
       Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 8,
+          bottom: MediaQuery.of(context).padding.bottom + 24,
+        ),
         decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          color: isDark ? AppColors.bottomSheetDark : AppColors.bottomSheet,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Confirm Payment',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const AppText(
+                  'Confirm Payment',
+                  fontWeight: FontWeight.bold,
+                  size: 20,
+                ),
+                IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                    padding: const EdgeInsets.all(4),
+                  ),
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             Text(
               'How did you pay ${CurrencyHelper.format(emi.monthlyAmount)} for ${emi.name}?',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(
+                color: isDark ? Colors.white70 : Colors.grey.shade600,
+                fontFamily: 'Poppins',
+              ),
             ),
             const SizedBox(height: 24),
             Row(
@@ -451,6 +503,7 @@ class _EmiCard extends StatelessWidget {
           ],
         ),
       ),
+      backgroundColor: Colors.transparent,
     );
   }
 
@@ -463,7 +516,7 @@ class _EmiCard extends StatelessWidget {
       if (walletCtrl.wallets.isNotEmpty) {
         final available = walletCtrl.getBalanceByPaymentType('Cash');
         if (emi.monthlyAmount > available) {
-          Get.snackbar(
+          showCustomSnackbar(
             'Error',
             'Insufficient Wallet (Cash) balance (${CurrencyHelper.format(available)})',
           );
@@ -482,7 +535,7 @@ class _EmiCard extends StatelessWidget {
       final dashCtrl = Get.find<DashboardController>();
       final available = dashCtrl.salaryLeft;
       if (emi.monthlyAmount > available) {
-        Get.snackbar(
+        showCustomSnackbar(
           'Error',
           'Insufficient Salary balance (${CurrencyHelper.format(available)})',
         );
@@ -494,14 +547,14 @@ class _EmiCard extends StatelessWidget {
     Get.back(); // close bottom sheet
 
     if (success) {
-      Get.snackbar(
+      showCustomSnackbar(
         'Success',
         'Instalment marked as paid via $method',
         backgroundColor: Colors.green.withValues(alpha: 0.1),
         colorText: Colors.green.shade900,
       );
     } else {
-      Get.snackbar('Error', 'Failed to update payment');
+      showCustomSnackbar('Error', 'Failed to update payment');
     }
   }
 }
@@ -534,10 +587,7 @@ class _PaymentMethodOption extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 32),
             const SizedBox(height: 8),
-            Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
+            Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       ),

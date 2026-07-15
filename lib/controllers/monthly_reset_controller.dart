@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pocket_hisab/controllers/salary_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -217,14 +218,14 @@ class MonthlyResetController extends GetxController {
 
       needsReset.value = false;
       Get.back();
-      Get.snackbar(
+      showCustomSnackbar(
         '🎉 New Month Started!',
         'Previous cycle archived. Fresh salary cycle begins.',
         duration: const Duration(seconds: 3),
       );
     } catch (e) {
       print("$e");
-      Get.snackbar('Error', 'Reset failed: $e');
+      showCustomSnackbar('Error', 'Reset failed: $e');
     } finally {
       isLoading.value = false;
     }

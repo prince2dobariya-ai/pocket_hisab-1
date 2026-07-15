@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
@@ -28,11 +29,11 @@ class AllTransactionsScreen extends StatelessWidget {
           bottom: TabBar(
             indicator: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: AppColors.primary.withValues(alpha: 0.15),
+              color: context.themePrimary.withValues(alpha: 0.15),
             ),
             splashBorderRadius: BorderRadius.circular(12),
             indicatorSize: TabBarIndicatorSize.tab,
-            labelColor: AppColors.primary,
+            labelColor: context.themePrimary,
             unselectedLabelColor: Colors.grey.shade500,
             labelStyle: const TextStyle(fontWeight: FontWeight.bold),
             dividerColor: Colors.transparent,
@@ -80,7 +81,34 @@ class AllTransactionsScreen extends StatelessWidget {
     BuildContext context,
   ) {
     if (items.isEmpty) {
-      return const Center(child: Text("No transactions found"));
+      return Center(
+        child: Column(
+          spacing: 24,
+          mainAxisAlignment: .center,
+          children: [
+            Container(
+              padding: const .all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: .circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.receipt_long_rounded,
+                size: 56,
+                color: context.themePrimary.withValues(alpha: 0.5),
+              ),
+            ),
+            const AppText('No Transactions Found'),
+          ],
+        ),
+      );
     }
 
     // Grouping by date
@@ -108,7 +136,7 @@ class AllTransactionsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+              padding: const EdgeInsets.fromLTRB(0, 12, 0, 6),
               child: Row(
                 children: [
                   Container(
@@ -117,13 +145,13 @@ class AllTransactionsScreen extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
+                      color: context.themePrimary.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: AppText(
                       getDateTitle(dayItems.first.dateTime),
                       size: 12,
-                      color: AppColors.primary,
+                      color: context.themePrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -131,7 +159,9 @@ class AllTransactionsScreen extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: 1,
-                      color: isDark ? Colors.grey.shade800 : AppColors.border,
+                      color: isDark
+                          ? Colors.grey.shade800
+                          : context.themeBorder,
                     ),
                   ),
                 ],
@@ -302,7 +332,7 @@ class AllTransactionsScreen extends StatelessWidget {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: item.paymentType == 'UPI'
+                                color: item.paymentType == 'Online'
                                     ? Colors.blue.withValues(alpha: 0.1)
                                     : Colors.green.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(4),
@@ -310,7 +340,7 @@ class AllTransactionsScreen extends StatelessWidget {
                               child: Text(
                                 item.paymentType!,
                                 style: TextStyle(
-                                  color: item.paymentType == 'UPI'
+                                  color: item.paymentType == 'Online'
                                       ? Colors.blue
                                       : Colors.green,
                                   fontSize: 10,
@@ -412,9 +442,9 @@ class AllTransactionsScreen extends StatelessWidget {
               }
 
               if (success) {
-                Get.snackbar("Success", "Transaction deleted");
+                showCustomSnackbar("Success", "Transaction deleted");
               } else {
-                Get.snackbar("Error", "Failed to delete transaction");
+                showCustomSnackbar("Error", "Failed to delete transaction");
               }
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
@@ -521,7 +551,7 @@ class _WalletTransactionsTabState extends State<_WalletTransactionsTab> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final upiItems = widget.walletItems
-        .where((i) => i.paymentType == 'UPI')
+        .where((i) => i.paymentType == 'Online')
         .toList();
     final cashItems = widget.walletItems
         .where((i) => i.paymentType == 'Cash')
@@ -541,14 +571,14 @@ class _WalletTransactionsTabState extends State<_WalletTransactionsTab> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       color: _selectedIndex == 0
-                          ? AppColors.primary
+                          ? context.themePrimary
                           : (isDark
                                 ? AppColors.darkCard
                                 : Colors.grey.shade200),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _selectedIndex == 0
-                            ? AppColors.primary
+                            ? context.themePrimary
                             : (isDark
                                   ? Colors.grey.shade800
                                   : Colors.grey.shade300),
@@ -556,7 +586,7 @@ class _WalletTransactionsTabState extends State<_WalletTransactionsTab> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      "UPI",
+                      "Online",
                       style: TextStyle(
                         color: _selectedIndex == 0
                             ? Colors.white
@@ -578,14 +608,14 @@ class _WalletTransactionsTabState extends State<_WalletTransactionsTab> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       color: _selectedIndex == 1
-                          ? AppColors.primary
+                          ? context.themePrimary
                           : (isDark
                                 ? AppColors.darkCard
                                 : Colors.grey.shade200),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: _selectedIndex == 1
-                            ? AppColors.primary
+                            ? context.themePrimary
                             : (isDark
                                   ? Colors.grey.shade800
                                   : Colors.grey.shade300),

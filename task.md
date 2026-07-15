@@ -415,6 +415,13 @@ Database Service
 SQFlite
 ```
 
+--- [x] Add `showcaseview` dependency to `pubspec.yaml`
+- [x] Implement `ShowCaseWidget` wrapping and GlobalKeys in `lib/screens/home/home_main.dart`
+- [x] Wrap FloatingActionButton and navigation tab buttons with `Showcase` widgets in `lib/screens/home/home_main.dart`
+- [x] Update `lib/screens/home/home_screen.dart` to receive `incomeKey`, wrap the "Add Income" button, and remove the temporary banner
+- [x] Connect the "Quick Guide" tile in `lib/screens/settings/setting_screen.dart` and help button in `HomeMain` to restart the showcase
+- [x] Verify that the project builds and runs correctlys
+
 ---
 
 # Example Expense Flow

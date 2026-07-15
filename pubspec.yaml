@@ -2,7 +2,7 @@ name: pocket_hisab
 description: "Khissu - Pocket Hisab"
 publish_to: 'none'
 
-version: 26.6.29+7
+version: 26.7.13+13
 
 environment:
   sdk: ^3.10.4
@@ -18,8 +18,15 @@ dependencies:
   path: ^1.9.1
   collection:
   shared_preferences: ^2.5.5
+  in_app_purchase: ^3.3.0
+  local_auth: ^3.0.1
+  home_widget: ^0.9.3
+  in_app_update: ^5.0.0
+  showcaseview: ^5.1.0
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   flutter_lints: ^6.0.0
 
 flutter:
@@ -27,6 +34,7 @@ flutter:
 
   assets:
     - assets/logo.webp
+    - assets/group_expense.png
 
   fonts:
     - family: Poppins

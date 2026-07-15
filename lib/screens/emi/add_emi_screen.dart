@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/controllers/emi_controller.dart';
 import 'package:pocket_hisab/models/emi_model.dart';
+import 'package:pocket_hisab/widgets/custom_appbar.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class AddEmiScreen extends StatefulWidget {
@@ -50,23 +53,19 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add New EMI'), centerTitle: true),
+      appBar: CustomAppBar(title: 'Add New EMI'),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const .all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16,
+          crossAxisAlignment: .start,
           children: [
-            const Text(
-              "EMI Details",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
+            const AppText("EMI Details"),
             CustomTextField(
               controller: _nameController,
               labelText: "EMI Name",
               hintText: "e.g. iPhone 15 Pro",
             ),
-            const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
@@ -90,7 +89,6 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
             CustomTextField(
               controller: _totalController,
               keyboardType: TextInputType.number,
@@ -98,7 +96,6 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
               hintText: "0.00",
               readOnly: true,
             ),
-            const SizedBox(height: 16),
             // Already Paid Amount
             CustomTextField(
               controller: _alreadyPaidController,
@@ -106,16 +103,11 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
               labelText: "Already Paid Amount",
               hintText: "0.00 (if you've paid some instalments before)",
             ),
-            const SizedBox(height: 24),
 
             // Due Day of Month picker
-            const Text(
-              "Monthly Due Date",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
+            const AppText("Monthly Due Date"),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const .symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.shade300),
                 borderRadius: BorderRadius.circular(12),
@@ -159,13 +151,8 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
 
-            const Text(
-              "Start Date",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
+            const AppText("Start Date"),
             InkWell(
               onTap: () async {
                 final date = await showDatePicker(
@@ -193,7 +180,6 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 40),
             CustomButton(
               title: "Create EMI",
               onTap: () async {
@@ -201,7 +187,7 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                     _totalController.text.isEmpty ||
                     _monthlyController.text.isEmpty ||
                     _tenureController.text.isEmpty) {
-                  Get.snackbar('Error', 'Please fill all fields');
+                  showCustomSnackbar('Error', 'Please fill all fields');
                   return;
                 }
 
@@ -234,9 +220,9 @@ class _AddEmiScreenState extends State<AddEmiScreen> {
                 final success = await Get.find<EmiController>().addEmi(emi);
                 if (success) {
                   Get.back();
-                  Get.snackbar('Success', 'EMI added successfully');
+                  showCustomSnackbar('Success', 'EMI added successfully');
                 } else {
-                  Get.snackbar('Error', 'Failed to add EMI');
+                  showCustomSnackbar('Error', 'Failed to add EMI');
                 }
               },
             ),

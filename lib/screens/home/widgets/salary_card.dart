@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/monthly_reset_controller.dart';
@@ -12,6 +13,7 @@ import 'package:pocket_hisab/models/salary_model.dart';
 import 'package:pocket_hisab/controllers/saving_controller.dart';
 import 'package:pocket_hisab/screens/emi/emi_screen.dart';
 import 'package:pocket_hisab/widgets/custom_button.dart';
+import 'package:pocket_hisab/widgets/custom_text.dart';
 import 'package:pocket_hisab/widgets/custome_textform_filed.dart';
 
 class SalaryCard extends StatelessWidget {
@@ -46,7 +48,7 @@ class SalaryCard extends StatelessWidget {
       return Container(
         padding: .all(16.0),
         decoration: BoxDecoration(
-          color: AppColors.primary.withAlpha(222),
+          color: context.themePrimary.withAlpha(222),
           borderRadius: .circular(12),
           border: .all(color: Colors.blueGrey.shade50, width: 0.6),
           boxShadow: [
@@ -86,21 +88,16 @@ class SalaryCard extends StatelessWidget {
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: AppColors.primary,
+                    foregroundColor: context.themePrimary,
                   ),
                   onPressed: () {
                     Get.bottomSheet(
                       const AddSalaryBottomSheet(),
                       isScrollControlled: true,
-                      backgroundColor: Colors.white,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
-                      ),
+                      backgroundColor: Colors.transparent,
                     );
                   },
-                  icon: Icon(Icons.add, color: AppColors.primary, size: 24),
+                  icon: Icon(Icons.add, color: context.themePrimary, size: 24),
                   label: Text("Add to Income"),
                 ),
               ],
@@ -284,9 +281,10 @@ class AddSalaryBottomSheet extends StatefulWidget {
 
 class AddSalaryBottomSheetState extends State<AddSalaryBottomSheet> {
   final _amountController = TextEditingController();
-  final _monthController = TextEditingController(text: _getCurrentMonth());
+  late final TextEditingController _dateController;
+  DateTime _selectedDate = DateTime.now();
 
-  static String _getCurrentMonth() {
+  static String _getMonthName(int monthNum) {
     const months = [
       'January',
       'February',
@@ -301,122 +299,159 @@ class AddSalaryBottomSheetState extends State<AddSalaryBottomSheet> {
       'November',
       'December',
     ];
-    return months[DateTime.now().month - 1];
+    return months[monthNum - 1];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _dateController = TextEditingController(
+      text: "${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}",
+    );
   }
 
   @override
   void dispose() {
     _amountController.dispose();
-    _monthController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
+  Future<void> _selectDate(BuildContext context) async {
+    final now = DateTime.now();
+    final firstDayOfCurrentMonth = DateTime(now.year, now.month, 1);
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: firstDayOfCurrentMonth,
+      lastDate: now,
+    );
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
+      });
+    }
+  }
+
+  @override
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.bottomSheetDark : AppColors.bottomSheet,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 24.0,
+        top: 8.0,
         bottom: MediaQuery.of(context).padding.bottom + 16.0,
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Add Income",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              IconButton(
-                onPressed: () => Get.back(),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "Income Amount",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          CustomTextField(
-            controller: _amountController,
-            keyboardType: TextInputType.number,
-            labelText: "Amount",
-            hintText: "Enter amount (e.g. 35000)",
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            "Select Month",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          DropdownButtonFormField<String>(
-            initialValue: _monthController.text,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(99),
+                ),
               ),
             ),
-            items:
-                [
-                      'January',
-                      'February',
-                      'March',
-                      'April',
-                      'May',
-                      'June',
-                      'July',
-                      'August',
-                      'September',
-                      'October',
-                      'November',
-                      'December',
-                    ]
-                    .map(
-                      (month) =>
-                          DropdownMenuItem(value: month, child: Text(month)),
-                    )
-                    .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                _monthController.text = value;
-              }
-            },
-          ),
-          const SizedBox(height: 24),
-          CustomButton(
-            title: "Save Salary",
-            onTap: () {
-              final amountText = _amountController.text.trim();
-              if (amountText.isEmpty) {
-                Get.snackbar('Error', 'Please enter salary amount');
-                return;
-              }
-              final amount = double.tryParse(amountText);
-              if (amount == null || amount <= 0) {
-                Get.snackbar('Error', 'Invalid amount entered');
-                return;
-              }
-
-              final salaryCtrl = Get.find<SalaryController>();
-              salaryCtrl.addSalary(
-                SalaryModel(
-                  amount: amount,
-                  createdAt: DateTime.now().toString(),
-                  month: _monthController.text,
-                  year: DateTime.now().year,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const AppText(
+                  "Add Income",
+                  fontWeight: FontWeight.bold,
+                  size: 20,
                 ),
-              );
+                IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                    padding: const EdgeInsets.all(4),
+                  ),
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const AppText(
+              "Income Amount & Date",
+              fontWeight: FontWeight.bold,
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: CustomTextField(
+                    controller: _amountController,
+                    keyboardType: TextInputType.number,
+                    labelText: "Amount",
+                    hintText: "Enter amount (e.g. 35000)",
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: CustomTextField(
+                    controller: _dateController,
+                    labelText: "Date",
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              title: "Save Salary",
+              onTap: () {
+                final amountText = _amountController.text.trim();
+                if (amountText.isEmpty) {
+                  showCustomSnackbar('Error', 'Please enter salary amount');
+                  return;
+                }
+                final amount = double.tryParse(amountText);
+                if (amount == null || amount <= 0) {
+                  showCustomSnackbar('Error', 'Invalid amount entered');
+                  return;
+                }
 
-              Get.back();
-            },
-          ),
-        ],
+                final salaryCtrl = Get.find<SalaryController>();
+                final now = DateTime.now();
+                final resolvedDateTime = DateTime(
+                  _selectedDate.year,
+                  _selectedDate.month,
+                  _selectedDate.day,
+                  now.hour,
+                  now.minute,
+                  now.second,
+                ).toString();
+
+                salaryCtrl.addSalary(
+                  SalaryModel(
+                    amount: amount,
+                    createdAt: resolvedDateTime,
+                    month: _getMonthName(_selectedDate.month),
+                    year: _selectedDate.year,
+                  ),
+                );
+
+                Get.back();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

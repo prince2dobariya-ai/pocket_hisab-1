@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:pocket_hisab/helpers/snackbar_helper.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 import 'package:pocket_hisab/controllers/hisab_controller.dart';
@@ -36,7 +37,34 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                     .toList();
 
                 if (items.isEmpty) {
-                  return const Center(child: Text("No history found"));
+                  return Center(
+                    child: Column(
+                      spacing: 24,
+                      mainAxisAlignment: .center,
+                      children: [
+                        Container(
+                          padding: const .all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: .circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.04),
+                                blurRadius: 16,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Icon(
+                            Icons.receipt_long_rounded,
+                            size: 56,
+                            color: context.themePrimary.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        const AppText('No Hisab Found'),
+                      ],
+                    ),
+                  );
                 }
 
                 // Sort items by date (Oldest first for chat-like flow)
@@ -57,14 +85,17 @@ class PersonHisabHistoryScreen extends StatelessWidget {
 
                 return ListView.builder(
                   reverse: true,
-                  padding: const .symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   itemCount: sortedDates.length,
                   itemBuilder: (context, index) {
                     String dateStr = sortedDates[index];
                     List<HisabModel> dayItems = groupedItems[dateStr]!;
                     return Column(
                       children: [
-                        _buildDateDivider(dateStr),
+                        _buildDateDivider(context, dateStr),
                         ...dayItems.map((item) => _buildChatBubble(item)),
                       ],
                     );
@@ -72,14 +103,14 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                 );
               }),
             ),
-            _buildBottomSummary(hisabCtrl),
+            _buildBottomSummary(context, hisabCtrl),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDateDivider(String dateStr) {
+  Widget _buildDateDivider(BuildContext context, String dateStr) {
     DateTime date = DateTime.parse(dateStr);
     String label;
     DateTime now = DateTime.now();
@@ -93,7 +124,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.border,
+        color: context.themeBorder,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -191,12 +222,12 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: item.paymentType == 'UPI'
+                      color: item.paymentType == 'Online'
                           ? Colors.blue.shade50
                           : Colors.green.shade50,
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                        color: item.paymentType == 'UPI'
+                        color: item.paymentType == 'Online'
                             ? Colors.blue.shade200
                             : Colors.green.shade200,
                       ),
@@ -204,7 +235,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                     child: Text(
                       item.paymentType,
                       style: TextStyle(
-                        color: item.paymentType == 'UPI'
+                        color: item.paymentType == 'Online'
                             ? Colors.blue.shade700
                             : Colors.green.shade700,
                         fontSize: 10,
@@ -245,9 +276,9 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                 item.id!,
               );
               if (success) {
-                Get.snackbar("Success", "Record deleted");
+                showCustomSnackbar("Success", "Record deleted");
               } else {
-                Get.snackbar("Error", "Failed to delete record");
+                showCustomSnackbar("Error", "Failed to delete record");
               }
             },
             child: const Text("Delete", style: TextStyle(color: Colors.red)),
@@ -257,7 +288,7 @@ class PersonHisabHistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomSummary(HisabController hisabCtrl) {
+  Widget _buildBottomSummary(BuildContext context, HisabController hisabCtrl) {
     return Obx(() {
       final items = hisabCtrl.hisabs
           .where((h) => h.personId.toString() == personId)
@@ -265,13 +296,15 @@ class PersonHisabHistoryScreen extends StatelessWidget {
 
       double netBalance = 0;
       for (var h in items) {
-        netBalance += (h.type == 'given' ? h.amount : -h.amount);
+        if (!h.isOld) {
+          netBalance += (h.type == 'given' ? h.amount : -h.amount);
+        }
       }
 
       return Container(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.themeCard,
           border: Border(top: BorderSide(color: Colors.grey.shade300)),
         ),
         child: Column(
@@ -310,10 +343,8 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                           isBorrowed: true,
                           personName: personName,
                         ),
-                        backgroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: .vertical(top: .circular(24)),
-                        ),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
                       );
                     },
                   ),
@@ -330,10 +361,8 @@ class PersonHisabHistoryScreen extends StatelessWidget {
                           isBorrowed: false,
                           personName: personName,
                         ),
-                        backgroundColor: Colors.white,
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: .vertical(top: .circular(24)),
-                        ),
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
                       );
                     },
                   ),
@@ -445,199 +474,234 @@ class _AddPersonHisabBottomSheetState
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.bottomSheetDark : AppColors.bottomSheet,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      ),
       padding: EdgeInsets.only(
         left: 16.0,
         right: 16.0,
-        top: 12.0,
+        top: 8.0,
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
-      child: Column(
-        mainAxisSize: .min,
-        crossAxisAlignment: .start,
-        children: [
-          const SizedBox(height: 24),
-          Row(
-            children: [
-              Expanded(
-                flex: 4,
-                child: CustomTextField(
-                  controller: _amountController,
-                  labelText: "Amount",
-                  keyboardType: TextInputType.number,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(99),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 3,
-                child: CustomTextField(
-                  controller: _dateController,
-                  labelText: "Date",
-                  readOnly: true,
-                  onTap: () => _selectDate(context),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                AppText(
+                  _isBorrowed ? "Receive Money" : "Give Money",
+                  fontWeight: FontWeight.bold,
+                  size: 18,
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const AppText("Note (Optional)"),
-          const SizedBox(height: 8),
-          CustomTextField(
-            controller: _noteController,
-            labelText: 'What was this for?',
-            maxLine: 3,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Checkbox(
-                value: _isOldMoney,
-                activeColor: Colors.orange,
-                onChanged: (val) {
-                  setState(() {
-                    _isOldMoney = val ?? false;
-                  });
-                },
-              ),
-              Expanded(
-                child: AppText(
-                  "Mark as Old Record (Does not calculate in balance)",
-                  size: 12,
-                  maxLines: 2,
+                IconButton(
+                  style: IconButton.styleFrom(
+                    backgroundColor: isDark
+                        ? Colors.grey.shade800
+                        : Colors.grey.shade100,
+                    padding: const EdgeInsets.all(4),
+                  ),
+                  onPressed: () => Get.back(),
+                  icon: const Icon(Icons.close_rounded, size: 20),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const AppText("Payment Type"),
-          const SizedBox(height: 8),
-          Row(
-            children: ['Cash', 'UPI'].map((type) {
-              final isSelected = _paymentType == type;
-              return Expanded(
-                child: InkWell(
-                  onTap: () {
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: CustomTextField(
+                    controller: _amountController,
+                    labelText: "Amount",
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 3,
+                  child: CustomTextField(
+                    controller: _dateController,
+                    labelText: "Date",
+                    readOnly: true,
+                    onTap: () => _selectDate(context),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const AppText("Note (Optional)"),
+            const SizedBox(height: 8),
+            CustomTextField(
+              controller: _noteController,
+              labelText: 'What was this for?',
+              maxLine: 3,
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Checkbox(
+                  value: _isOldMoney,
+                  activeColor: Colors.orange,
+                  onChanged: (val) {
                     setState(() {
-                      _paymentType = type;
+                      _isOldMoney = val ?? false;
                     });
                   },
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppColors.primary
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
+                ),
+                Expanded(
+                  child: AppText(
+                    "Mark as Old Record (Does not calculate in balance)",
+                    size: 12,
+                    maxLines: 2,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const AppText("Payment Type"),
+            const SizedBox(height: 8),
+            Row(
+              children: ['Cash', 'Online'].map((type) {
+                final isSelected = _paymentType == type;
+                return Expanded(
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        _paymentType = type;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? AppColors.primary
-                            : Colors.grey.shade300,
+                            ? context.themePrimary
+                            : isDark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected
+                              ? context.themePrimary
+                              : isDark
+                              ? Colors.grey.shade700
+                              : Colors.grey.shade300,
+                        ),
                       ),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      type,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
+                      alignment: Alignment.center,
+                      child: Text(
+                        type,
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : isDark
+                              ? Colors.white70
+                              : Colors.black87,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-          CustomButton(
-            title: _isBorrowed ? "Received" : "Given",
-            color: _isBorrowed ? Colors.green.shade400 : Colors.red.shade400,
-            onTap: () async {
-              final amountText = _amountController.text.trim();
-
-              if (amountText.isEmpty) {
-                Get.snackbar("Error", "Please enter amount");
-                return;
-              }
-
-              final amount = double.tryParse(amountText);
-              if (amount == null || amount <= 0) {
-                Get.snackbar("Error", "Invalid amount entered");
-                return;
-              }
-
-              final hisabCtrl = Get.find<HisabController>();
-              final walletCtrl = Get.find<WalletController>();
-
-              // Get or create person to get personId
-              // final personId = await hisabCtrl.getOrCreatePerson(widget.personId);
-
-              // Pre-validate Wallet Balance if it's a debit (given)
-              if (!_isBorrowed && walletCtrl.wallets.isNotEmpty) {
-                final available = walletCtrl.getBalanceByPaymentType(
-                  _paymentType,
                 );
-                if (amount > available) {
-                  Get.snackbar(
-                    'Error',
-                    'Insufficient $_paymentType balance (${CurrencyHelper.format(available)})',
-                  );
+              }).toList(),
+            ),
+            const SizedBox(height: 24),
+            CustomButton(
+              title: _isBorrowed ? "Received" : "Given",
+              color: _isBorrowed ? Colors.green.shade400 : Colors.red.shade400,
+              onTap: () async {
+                final amountText = _amountController.text.trim();
+
+                if (amountText.isEmpty) {
+                  showCustomSnackbar("Error", "Please enter amount");
                   return;
                 }
-              }
 
-              // Add Hisab
-              final type = _isBorrowed ? 'borrowed' : 'given';
-              await hisabCtrl.addHisab(
-                HisabModel(
-                  personId: int.parse(widget.personId.toString()),
-                  personName: widget.personId,
-                  type: type,
-                  amount: amount,
-                  note: _noteController.text.trim(),
-                  createdAt: _selectedDate.toIso8601String(),
-                  status: 'pending',
-                  amountPaid: 0,
-                  remainingAmount: amount,
-                  isOld: _isOldMoney,
-                  paymentType: _paymentType,
-                ),
-              );
-
-              // Affect Wallet
-              if (walletCtrl.wallets.isNotEmpty) {
-                final walletId = walletCtrl.wallets.first.id!;
-                if (_isBorrowed) {
-                  await walletCtrl.credit(
-                    walletId: walletId,
-                    amount: amount,
-                    source: 'Hisab: ${widget.personName}',
-                    note: 'Received from ${widget.personName}',
-                    paymentType: _paymentType,
-                  );
-                } else {
-                  await walletCtrl.debit(
-                    walletId: walletId,
-                    amount: amount,
-                    source: 'Hisab: ${widget.personName}',
-                    note: 'Given to ${widget.personName}',
-                    paymentType: _paymentType,
-                  );
+                final amount = double.tryParse(amountText);
+                if (amount == null || amount <= 0) {
+                  showCustomSnackbar("Error", "Invalid amount entered");
+                  return;
                 }
-              } else {
-                Get.snackbar(
-                  "Info",
-                  "Hisab recorded, but no wallet found to update balance.",
-                );
-              }
 
-              Get.back();
-            },
-          ),
-        ],
+                final hisabCtrl = Get.find<HisabController>();
+                final walletCtrl = Get.find<WalletController>();
+
+                // Get or create person to get personId
+                // final personId = await hisabCtrl.getOrCreatePerson(widget.personId);
+
+                // Add Hisab
+                final type = _isBorrowed ? 'borrowed' : 'given';
+                await hisabCtrl.addHisab(
+                  HisabModel(
+                    personId: int.parse(widget.personId.toString()),
+                    personName: widget.personId,
+                    type: type,
+                    amount: amount,
+                    note: _noteController.text.trim(),
+                    createdAt: _selectedDate.toIso8601String(),
+                    status: 'pending',
+                    amountPaid: 0,
+                    remainingAmount: amount,
+                    isOld: _isOldMoney,
+                    paymentType: _paymentType,
+                  ),
+                );
+
+                // Affect Wallet
+                if (!_isOldMoney) {
+                  if (walletCtrl.wallets.isNotEmpty) {
+                    final walletId = walletCtrl.wallets.first.id!;
+                    if (_isBorrowed) {
+                      await walletCtrl.credit(
+                        walletId: walletId,
+                        amount: amount,
+                        source: 'Hisab: ${widget.personName}',
+                        note: 'Received from ${widget.personName}',
+                        paymentType: _paymentType,
+                      );
+                    } else {
+                      await walletCtrl.debit(
+                        walletId: walletId,
+                        amount: amount,
+                        source: 'Hisab: ${widget.personName}',
+                        note: 'Given to ${widget.personName}',
+                        paymentType: _paymentType,
+                        checkBalance: false,
+                      );
+                    }
+                  } else {
+                    showCustomSnackbar(
+                      "Info",
+                      "Hisab recorded, but no wallet found to update balance.",
+                    );
+                  }
+                }
+
+                Get.back();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

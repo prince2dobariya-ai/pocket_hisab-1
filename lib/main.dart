@@ -12,7 +12,9 @@ import 'package:pocket_hisab/controllers/transaction_controller.dart';
 import 'package:pocket_hisab/controllers/wallet_controller.dart';
 import 'package:pocket_hisab/controllers/settings_controller.dart';
 import 'package:pocket_hisab/controllers/saving_controller.dart';
+import 'package:pocket_hisab/controllers/pro_controller.dart';
 import 'package:pocket_hisab/screens/home/home_main.dart';
+import 'package:pocket_hisab/screens/settings/app_lock_screen.dart';
 import 'package:pocket_hisab/screens/onboarding/onboarding_screen.dart';
 import 'package:pocket_hisab/constants/app_theme.dart';
 
@@ -44,6 +46,7 @@ void main() async {
   Get.put(DashboardController());
   Get.put(SettingsController());
   Get.put(MonthlyResetController());
+  Get.put(ProController());
 
   runApp(MyApp(showOnboarding: !onboardingDone));
 }
@@ -54,21 +57,49 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Khissu - Pocket Hisab',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: .light,
-      home: showOnboarding ? const OnboardingScreen() : const HomeMain(),
-      builder: (context, child) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaler: TextScaler.linear(1),
-          ),
-          child: child!,
-        );
-      },
-    );
+    return Obx(() {
+      final settingsCtrl = Get.find<SettingsController>();
+      final proCtrl = Get.find<ProController>();
+
+      ThemeMode currentThemeMode = ThemeMode.light;
+      if (proCtrl.isPro.value) {
+        switch (settingsCtrl.themeMode.value) {
+          case 'light':
+            currentThemeMode = ThemeMode.light;
+            break;
+          case 'dark':
+            currentThemeMode = ThemeMode.dark;
+            break;
+          default:
+            currentThemeMode = ThemeMode.system;
+        }
+      }
+
+      final themeColor = Color(settingsCtrl.themeColorValue.value);
+
+      return GetMaterialApp(
+        title: 'Khissu - Pocket Hisab',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.getLightTheme(themeColor),
+        darkTheme: AppTheme.getDarkTheme(themeColor),
+        themeMode: currentThemeMode,
+        home: showOnboarding
+            ? const OnboardingScreen()
+            : Obx(() {
+                if (settingsCtrl.appLockEnabled.value && proCtrl.isPro.value) {
+                  return const AppLockScreen(child: HomeMain());
+                }
+                return const HomeMain();
+              }),
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1)),
+            child: child!,
+          );
+        },
+      );
+    });
   }
 }

@@ -4,14 +4,14 @@ import 'package:pocket_hisab/widgets/custom_text.dart';
 
 class CustomButton extends StatelessWidget {
   final String title;
-  final Color color;
+  final Color? color;
   final VoidCallback onTap;
 
   const CustomButton({
     super.key,
     required this.title,
     required this.onTap,
-    this.color = AppColors.primary,
+    this.color,
   });
 
   @override
@@ -19,9 +19,9 @@ class CustomButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: .infinity,
-        padding: .symmetric(vertical: 16),
-        decoration: BoxDecoration(borderRadius: .circular(12), color: color),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: color ?? context.themePrimary),
         child: Center(child: AppText(title, color: Colors.white)),
       ),
     );
